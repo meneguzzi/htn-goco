@@ -1,0 +1,8 @@
+(defproblem pbt ctest
+	( (p a0)
+	  (q b0)
+	  (li (b0 c0))
+	)
+	
+	( (task1 a0 b0))
+)

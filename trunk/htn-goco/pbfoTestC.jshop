@@ -1,0 +1,105 @@
+(defproblem pbfotestc cgfo
+   ;Problem 1
+	(
+	 (commitment c1 C1 m c)
+	 
+	 (agent m)
+	 (agent c)
+    
+	 ) ;Preconds
+	
+	(
+	 (testCommitment c1 C1 (t1) null) (testCommitment c1 C1 (t1) nactive)
+	 (!create c1 C1 m c (t1)) (testCommitment c1 C1 (t1) active) 
+		                      (testCommitment c1 C1 (t1) conditional) 
+	 (!sendPayment c m t1) (testCommitment c1 C1 (t1) active) 
+		                   (testCommitment c1 C1 (t1) detached) 
+	 (!suspend c1 C1 m c (t1)) (testCommitment c1 C1 (t1) pending) 
+		                       (testCommitment c1 C1 (t1) nactive)
+	 (!reactivate c1 C1 m c (t1)) (testCommitment c1 C1 (t1) active) 
+		                          (testCommitment c1 C1 (t1) detached) 
+	 (!sendGoods m c t1) (testCommitment c1 C1 (t1) satisfied) 
+		                 (testCommitment c1 C1 (t1) nactive)
+	) ;initial HTN
+	
+	;; Problem 2
+	(
+	 (commitment c1 C1 m c)
+					 
+	 (agent m)
+	 (agent c)
+					
+	 (paid c t1)
+				    
+	 ) ;Preconds
+					
+	(
+		 (testCommitment c1 C1 (t1) null) (testCommitment c1 C1 (t1) nactive)
+		 (!create c1 C1 m c (t1)) (testCommitment c1 C1 (t1) detached) 
+			                      (testCommitment c1 C1 (t1) active)
+		 (!suspend c1 C1 m c (t1)) (testCommitment c1 C1 (t1) pending) 
+			                       (testCommitment c1 C1 (t1) nactive)
+		 (!reactivate c1 C1 m c (t1)) (testCommitment c1 C1 (t1) detached) 
+			                          (testCommitment c1 C1 (t1) active)
+		 (!sendGoods m c t1) (testCommitment c1 C1 (t1) satisfied) 
+			                 (testCommitment c1 C1 (t1) nactive)
+		) ;initial HTN
+					
+	;;Problem 3
+	(
+	 (commitment c1 C1 m c)
+					 
+	 (agent m)
+	 (agent c)
+					
+	 (paid c t1)
+				    
+	) ;Preconds
+					
+	(
+	 (testCommitment c1 C1 (t1) null) (testCommitment c1 C1 (t1) nactive)
+	 (!create c1 C1 m c (t1)) (testCommitment c1 C1 (t1) detached) 
+		                      (testCommitment c1 C1 (t1) active)
+	 (!cancel c1 C1 m c (t1)) (testCommitment c1 C1 (t1) cancelled) 
+		                      (testCommitment c1 C1 (t1) violated) 
+						      (testCommitment c1 C1 (t1) nactive)
+	 (!sendGoods m c t1) (testCommitment c1 C1 (t1) violated) 
+		                 (testCommitment c1 C1 (t1) nactive)
+	) ;initial HTN
+				
+	;Problem 4
+	(
+		(commitment c1 C1 m c)
+					 
+		(agent m)
+		(agent c)
+				    
+		 ) ;Preconds
+					
+		(
+		 (testCommitment c1 C1 (t1) null) (testCommitment c1 C1 (t1) nactive)
+		 (!create c1 C1 m c (t1)) (testCommitment c1 C1 (t1) conditional) 
+			                      (testCommitment c1 C1 (t1) active)
+		 (!cancel c1 C1 m c (t1)) (testCommitment c1 C1 (t1) terminated) 
+			                      (testCommitment c1 C1 (t1) nactive)
+		) ;initial HTN
+					
+	;Problem 5
+	(
+	 (commitment c1 C1 m c)
+					 
+	(agent m)
+	(agent c)
+				    
+	 ) ;Preconds
+					
+	(
+	 (testCommitment c1 C1 (t1) null) (testCommitment c1 C1 (t1) nactive)
+	 (!create c1 C1 m c (t1)) (testCommitment c1 C1 (t1) conditional) 
+		                      (testCommitment c1 C1 (t1) active)
+	 (!release c1 C1 m c (t1)) (testCommitment c1 C1 (t1) terminated)
+	                           (testCommitment c1 C1 (t1) terminal) 
+		                       (testCommitment c1 C1 (t1) nactive)
+	) ;initial HTN
+	
+)

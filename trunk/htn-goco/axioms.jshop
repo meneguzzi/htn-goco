@@ -1,0 +1,101 @@
+;=============================================
+; Axioms for goals
+; predicates on goals - null(c) suspendedG(c) aborted(c) dropped(c) satisfiedG(c)
+;=============================================
+
+  (:- (inactiveG ?g) 
+    	        (and (not (null ?g)) (not (pg ?g)) (not (f ?g)) (not (s ?g)) (not (lockedG ?g)) (not (suspendedG ?g))) )
+      (:- (activeG ?g) 
+    	        (and (not (null ?g)) (pg ?g) (not (f ?g)) (not (s ?g)) (not (lockedG ?g)) (not (suspendedG ?g))) )
+    
+      (:- (satisfiedG ?g) (and (not (null ?g)) (not (lockedG ?g)) (pg ?g) (s ?g) (not (f ?g))) )
+    
+    ;  (:- (suspended ?g) (and (not (null ?g)) (not (locked ?g)) (suspended ?g) ) )
+    
+      (:- (failedG ?g) (and (not (null ?g)) (f ?g) ) )
+    
+      (:- (terminatedG ?g) (and (not (null ?g)) (or (dropped ?g) (aborted ?g)) ) )
+    
+      ; A rule to ensure that 
+      (:- (lockedG ?g) (and (goal ?g ?a) (or (dropped ?g) (aborted ?g) )) )
+
+
+;=============================================
+; Axioms for commitments
+; predicates on commitments - null(c) cancelled(c) released(c) pending(c) satisfied(c)
+;=============================================
+
+ (:- (conditional ?c) 
+        (and (active ?c) (not (p ?c)) ) )
+ (:- (detached ?c) 
+        (and (active ?c) (p ?c) ) )
+ ; A conditional commitment is active
+ (:- (active ?c) (and (not (null ?c)) 
+                   ;(not (cancelled ?c)) 
+	               ;(not (released ?c)) 
+		           (not (locked ?c))
+	               (not (pending ?c)) 
+		           (not (satisfied ?c)) 
+			  ) )
+
+ (:- (terminated ?c)  (or (and (not (p ?c)) (cancelled ?c)) (released ?c)) )
+
+ (:- (violated ?c) (or (and (p ?c) (cancelled ?c)) (and (not (p ?c)) ) ) )
+
+ (:- (satisfied ?c) (and (not (null ?c)) (not (locked ?c)) (p ?c) (q ?c)) )
+
+ ; (:- (expired ?c) (and (not (null ?c)) (not (p ?c)) ) )
+
+ ; A rule to enumerate that certain states are terimnal
+ (:- (locked ?c) (and (commitment ?c ?d ?a) (or (cancelled ?c) (released ?c) (expired ?c))) )
+
+
+ ;=========
+ ; Goals
+ ;=========
+
+ ; Merchant
+ ; G1 = G(m, payc, false)
+ (:- (pg ?g) (and (goal ?g ?a) (goalType ?g G1) ) )
+ (:- (s ?g) (and (goal ?g ?a) (goalType ?g G1) (payc)) )
+ (:- (f ?g) (and (goal ?g ?a) (goalType ?g G1) (deadlinec) ))
+
+ ; G3 = G(m, goodsc, deadlinec) --- The merchant will adopt the goal to deliver the goods
+ (:- (pg ?g) (and (goal ?g ?a) (goalType ?g G3) (payc)) )
+ (:- (s ?g) (and (goal ?g ?a) (goalType ?g G3) (goodsc)) )
+ (:- (f ?g) (and (goal ?g ?a) (goalType ?g G3) (deadlinec) ))
+ ; Customer
+ ; G2 = G(c, goodsc, false)
+ (:- (pg ?g) (and (goal ?g ?a) (goalType ?g G2) (needsgoods)) )
+ (:- (s ?g) (and (goal ?g ?a) (goalType ?g G2) (goodsc)))
+ (:- (f ?g) (and (goal ?g ?a) (goalType ?g G2) (deadlinec)))
+ ; G4 = G(c, goods, pay, deadlinec)
+ (:- (pg ?g) (and (goal ?g ?a) (goalType ?g G4) (goodcs)) )
+ (:- (s ?g) (and (goal ?g ?a) (goalType ?g G4) (payc) ))
+ (:- (f ?g) (and (goal ?g ?a) (goalType ?g G4) (deadlinec) ))
+
+ ;============
+ ; Commitments
+ ;============
+
+ ; Merchant
+ ; C1 = C(m, c, payc, goodsc)
+ (:- (p ?c) (and (commitment ?c ?d ?a) (commitmentType ?c C1) (payc)) ) 
+ (:- (q ?c) (and (commitment ?c ?d ?a) (commitmentType ?c C1) (goodsc)) )
+ ; C2 = C(m, c, acceptedc, goodsc)
+ ; (:- (p ?c) (and (commitment ?c ?d ?a) (commitmentType ?c C2) (acceptedc))) 
+ ; (:- (q ?c) (and (commitment ?c ?d ?a) (commitmentType ?c C2) (goodsc)))
+ ; C3 = C(m, c, returnedc, goodsc)
+ (:- (p ?c) (and (commitment ?c ?d ?a) (commitmentType ?c C3) (returnedc))) 
+ (:- (q ?c) (and (commitment ?c ?d ?a) (commitmentType ?c C3) (goodsc)))
+ ; C4 = C(m, c, returnedc, refundc)
+ ; (:- (p ?c) (and (commitment ?c ?d ?a) (commitmentType ?c C4) (returnedc))) 
+ ; (:- (q ?c) (and (commitment ?c ?d ?a) (commitmentType ?c C4) (refundc)))
+
+ ; Customer
+ ; C5 = C(c, m, goodsc, payc)
+ (:- (p ?c) (and (commitment ?c ?d ?a) (commitmentType ?c C5) (goodsc)) ) 
+ (:- (q ?c) (and (commitment ?c ?d ?a) (commitmentType ?c C5) (payc)) )
+ ; C6 = C(c, m, goods, pay)
+ ; (:- (p ?c) (and (commitment ?c ?d ?a) (commitmentType ?c C6) (acceptedc))) 
+ ; (:- (q ?c) (and (commitment ?c ?d ?a) (commitmentType ?c C6) (goodsc)))

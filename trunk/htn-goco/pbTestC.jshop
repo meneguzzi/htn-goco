@@ -1,0 +1,158 @@
+(defproblem pbtestc cg
+	   ;Problem 1
+		(
+		 (commitment c1 m c)
+		 (commitmentType c1 C1) 
+		 (null c1)
+	 
+		(agent m)
+		(agent c)
+    
+		 ) ;Preconds
+	
+		(
+		 (testCommitment c1 null) (testCommitment c1 nactive)
+		 (!create c1 m c) (testCommitment c1 active) (testCommitment c1 conditional) 
+		 (!sendPayment c m) (testCommitment c1 active) (testCommitment c1 detached) 
+		 (!suspend c1 m c) (testCommitment c1 pending) (testCommitment c1 nactive)
+		 (!reactivate c1 m c) (testCommitment c1 active) (testCommitment c1 detached) 
+		 (!sendGoods m c) (testCommitment c1 satisfied) (testCommitment c1 nactive)
+		) ;initial HTN
+	
+	;Problem 2
+				(
+				 (commitment c1 m c)
+				 (commitmentType c1 C1) 
+				 (null c1)
+			 
+				(agent m)
+				(agent c)
+			
+				(payc)
+		    
+				 ) ;Preconds
+			
+				(
+				 (testCommitment c1 null) (testCommitment c1 nactive)
+				 (!create c1 m c) (testCommitment c1 detached) (testCommitment c1 active)
+				 (!suspend c1 m c) (testCommitment c1 pending) (testCommitment c1 nactive)
+				 (!reactivate c1 m c) (testCommitment c1 detached) (testCommitment c1 active)
+				 (!sendGoods m c) (testCommitment c1 satisfied) (testCommitment c1 nactive)
+				) ;initial HTN
+			
+			;Problem 3
+				(
+				 (commitment c1 m c)
+				 (commitmentType c1 C1) 
+				 (null c1)
+			 
+				(agent m)
+				(agent c)
+			
+				(payc)
+		    
+				 ) ;Preconds
+			
+				(
+				 (testCommitment c1 null) (testCommitment c1 nactive)
+				 (!create c1 m c) (testCommitment c1 detached) (testCommitment c1 active)
+				 (!cancel c1 m c) (testCommitment c1 cancelled) (testCommitment c1 violated) (testCommitment c1 nactive)
+				 (!sendGoods m c) (testCommitment c1 violated) (testCommitment c1 nactive)
+				) ;initial HTN
+		
+			;Problem 4
+			(
+				 (commitment c1 m c)
+				 (commitmentType c1 C1) 
+				 (null c1)
+			 
+				(agent m)
+				(agent c)
+		    
+				 ) ;Preconds
+			
+				(
+				 (testCommitment c1 null) (testCommitment c1 nactive)
+				 (!create c1 m c) (testCommitment c1 conditional) (testCommitment c1 active)
+				 (!cancel c1 m c) (testCommitment c1 terminated) (testCommitment c1 nactive)
+				) ;initial HTN
+			
+			;Problem 5
+			(
+			 (commitment c1 m c)
+			 (commitmentType c1 C1) 
+			 (null c1)
+			 
+			(agent m)
+			(agent c)
+		    
+			 ) ;Preconds
+			
+			(
+			 (testCommitment c1 null) (testCommitment c1 nactive)
+			 (!create c1 m c) (testCommitment c1 conditional) (testCommitment c1 active)
+			 (!release c1 m c) (testCommitment c1 terminated) (testCommitment c1 nactive)
+			) ;initial HTN
+)
+
+; Brief description of the fluents in this domain
+ ; (goal ?g ?a) - ?g is a goal of agent ?a
+ ; (goalType ?g ?t) - ?g is a goal of type ?t
+ ; (commitment ?c ?d ?a) - ?c is a commitment of agent ?d towards agent ?a
+ ; (commitmentType ?c ?t) - ?c is a commitment of type ?t
+	
+ ; (s ?g) - a rule stating that the success condition for goal ?g is satisfied
+ ; (f ?g) - a rule stating that the failure condition for goal ?g is satisfied
+	
+ ; (p ?c) - a rule stating that the antecedent of commitment ?c is satisfied
+ ; (q ?c) - a rule stating that the consequent of commitment ?c is satisfied
+	
+ ; (eqGSCP ?g ?c) - a rule stating that the success condition of goal ?g (s ?g) is linked to the antecedent condition of commitment ?c (p ?c).
+
+ ; States of commitments
+ ; (null ?c)
+ ; (detached ?c)
+ ; (conditional ?c)
+ ; (expired ?c)
+ ; (pending ?c)
+ ; (violated ?c)
+ ; (terminated ?c)
+ ; (active ?c) -- Which is either conditional or detached
+ ; (satisfied ?c)
+
+ ; States of goals
+ ; (null ?g)
+ ; (inactive ?g)
+ ; (active ?g)
+ ; (suspended ?g)
+ ; (terminated ?g)
+ ; (satisfied ?g)
+ ; (failed ?g)
+
+
+ ;=======================================================================================
+ ; Purchase model for goals and commitments
+ ;========================================================================================
+
+ ; == Goals ==
+ ; G(x, s, f) - x: agent, s: successcondition, f: failurecondition
+
+ ; Merchant
+ ; G1 = G(m, goodsc, deadlinec)
+
+ ; Customer
+ ; G2 = G(c, payc, deadlinem)
+ ; G3 = G(c, goodsc, deadlinec)
+
+ ; == Commitments ==
+ ; C(x, y, p, q) - x: debtor, y: creditor, p: antecedent, q: consequent
+ 
+ ; Merchant
+ ; C1 = C(m, c, payc, goodsc)
+ ; C2 = C(m, c, acceptedc, goodsc)
+ ; C3 = C(m, c, returnedc, goodsc)
+ ; C4 = C(m, c, returnedc, refundc)
+
+ ; Customer
+ ; C5 = C(c, m, goodsc, payc)
+ ; C6 = C(c, m, goods, pay)

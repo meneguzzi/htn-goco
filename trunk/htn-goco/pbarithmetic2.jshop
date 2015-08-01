@@ -1,0 +1,45 @@
+(defproblem pbarithmetic2 cgfoarithmetic
+  
+  ;Preconds	
+  (
+    (agent Buyer)
+    (agent Seller1)
+    (agent Seller2)
+	
+	(has Buyer 200)
+	(has Seller1 100)
+	(has Seller2 100)
+	
+	(goods Seller1 t1)
+	(cost Seller1 t1 100)
+	(goods Seller2 t1)
+	(cost Seller1 t1 150)
+
+    ; c7 and c8 are two instances of commitment type C7
+    ; (commitment c7 C7 Seller1 Buyer)
+    ; (commitment c8 C7 Seller2 Buyer)
+	 (goal g1 G1 Seller1)
+	 (goal g2 G2 Buyer)
+	 (goal g3 G3 Seller1)
+	 (goal g4 G4 Buyer)
+	 
+	 (commitment c1 C1 Seller1 Buyer)
+	 (commitment c2 C2 Seller1 Buyer)	
+	 ; (commitment c3 C3 Seller1 Buyer)
+	 ; (commitment c4 C4 Seller1 Buyer)
+	 (commitment c5 C5 Buyer Seller1)
+	  ; (commitment c6 C6 Buyer Seller1)
+	  
+	  (needsgoods Buyer t1)
+  )
+  
+  ;Initial HTN
+  (
+	  (!consider g1 G1 Seller1 (t1)) 
+	  (!activate g1 G1 Seller1 (t1)) 
+	  ; (testGoalCommitmentRule eqGSCP g1 G1 Seller1 c1 C1 Seller1 Buyer) 
+	  ; (!create c1 C1 Seller1 Buyer (t1)) (detach c1 C1 (t1)) 
+	  (achieveGoal g1 G1 Seller1 (t1))
+  )
+)
+

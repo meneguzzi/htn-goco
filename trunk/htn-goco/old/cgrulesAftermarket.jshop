@@ -1,0 +1,775 @@
+(defdomain cgrulesAftermarket
+ (
+
+  ;; Rules
+  ;; Rule for a goal G(g, p, r, q, s, f), where:
+	; g - goal identifier
+	; p - goal precondition
+	; r - goal in-condition
+	; q - goal effect
+	; s - goal success condition
+	; f - goal failure condition
+ ;; Goal 1
+ (:- (p ?g) (and (goal ?g) (goalType ?g 1))) ; This represents that p is always true for goals of type 1
+ (:- (r ?g) (and (goal ?g) (goalType ?g 1))) ; This represents that r is always true for goals of type 1
+ (:- (q ?g) (and (goal ?g) (goalType ?g 1) (paymentMade) (healthReportingPromised)))
+ (:- (s ?g) (and (goal ?g) (goalType ?g 1) (paymentMade) (healthReportingPromised)))
+ (:- (f ?g) (and (goal ?g) (goalType ?g 1) (insufficientMoney) ))
+ ; Goal 4
+ (:- (p ?g) (and (goal ?g) (goalType ?g 4))) 
+ (:- (r ?g) (and (goal ?g) (goalType ?g 4))) 
+ (:- (q ?g) (and (goal ?g) (goalType ?g 4) (engineProvided) (serviceProvided)))
+ (:- (s ?g) (and (goal ?g) (goalType ?g 4) (paymentMade) (healthReportingPromised)))
+ (:- (f ?g) (and (goal ?g) (goalType ?g 4) (engineNotProvided) ))
+; Goal 6
+ (:- (p ?g) (and (goal ?g) (goalType ?g 6) (serviceRequested))) 
+ (:- (r ?g) (and (goal ?g) (goalType ?g 6))) 
+ (:- (q ?g) (and (goal ?g) (goalType ?g 6) (serviceProvided)))
+ (:- (s ?g) (and (goal ?g) (goalType ?g 6) (serviceProvided)))
+ (:- (f ?g) (and (goal ?g) (goalType ?g 6) (serviceNotProvided) ))
+; Goal 7
+(:- (p ?g) (and (goal ?g) (goalType ?g 7) (engineDown))) 
+(:- (r ?g) (and (goal ?g) (goalType ?g 7))) 
+(:- (q ?g) (and (goal ?g) (goalType ?g 7) (penaltyPaid)))
+(:- (s ?g) (and (goal ?g) (goalType ?g 7) (penaltyPaid)))
+(:- (f ?g) (and (goal ?g) (goalType ?g 7) (penaltyNotPaid) ))
+
+;; General rule to say a goal failed
+(:- (failed ?g) (and (goal ?g) (f ?g)) )
+
+
+ ;; Rules for Commitments
+ ;; Rule for a commitment C(c, ga, gc), where:
+	; c - commitment identifier
+	; ga - antecedent
+	; gc - consequent
+(:- (ga ?c) (and (commitment ?c) (commitmentType ?c 1) (paymentMade) (healthReportingPromised) )) ; Antecedent of c1 is the effect of g1
+(:- (gc ?c) (and (commitment ?c) (commitmentType ?c 1) (engineProvided) (serviceProvided) )) ; Consequent of c1 is the effect of g4
+	
+(:- (ga ?c) (and (commitment ?c) (commitmentType ?c 3) (goalType g? 6) (and (serviceProvided) (not (expired ?g)) ) )) ; Antecedent of c1 is the effect of g6 and its non-expiration
+(:- (gc ?c) (and (commitment ?c) (commitmentType ?c 3) (paymentMade) (healthReportingPromised) )) ; Consequent of c3 is the effect of g4
+
+
+
+	; (:operator (!name ?arg)
+    ;            () ; Precondition
+    ; 	           () ; Delete List
+    ; 		       () ; Add List
+    ; 			   1 ; Cost
+    ; )
+
+  ;; Operators
+ (:operator (!createConditional ?c)
+	 ((commitment ?c) ; Precondition
+	  (null ?c)
+	  (not (ga ?c))
+	 )
+
+	 ((null ?c)) ; Delete list
+     ((conditional ?c)) ; Add List
+	 1 ; Cost
+    )
+
+    (:operator (!createDetached ?c)
+	  ( (commitment ?c); Precondition
+	    (null ?c)
+	    (ga ?c))
+
+  	   ((null ?c)) ; Delete list
+       ((detached ?c))
+	   1
+    )
+
+    (:operator (!expire ?c)
+	   ((commitment ?c)
+		(conditional ?c)
+		(activetimeout))
+
+        ((conditional ?c))
+    	((expired ?c))
+        1
+    )
+
+    (:operator (!detach ?c)
+	 ( (commitment ?c)
+       (conditional ?c)
+			    (ga ?c) )
+
+         ((conditional ?c))
+         ((detached ?c))
+         1
+    )
+
+    (:operator (!suspendConditional ?c)
+	 ( (commitment ?c)
+	   (conditional ?c))
+
+       ((conditional ?c))
+       ((pending ?c))
+       1 
+    )
+
+    (:operator (!suspendDetached ?c)
+	 ( (commitment ?c)
+	   (detached ?c))
+
+       ((detached ?c))
+       ((pending ?c))
+    1 
+    )
+
+	;;; In PDDL it was revive, but in the papers it's called reactivate
+    (:operator (!reactivateConditional ?c)
+	 ( (commitment ?c)
+	   (pending ?c)
+	   ;(not (p))
+	 )
+
+       ((pending ?c))
+       ((conditional ?c))
+       1
+    )
+
+
+    (:operator (!reactivateDetached ?c)
+	 ( (commitment ?c)
+	   (pending ?c)
+	   ;(p)
+	   )
+
+       ((pending ?c))
+       ((detached ?c))
+       1
+    )
+
+    ; (:operator (!satisfy ?c)
+    ; 	 ( (commitment ?c)
+    ; 	   ;(not (null ?c))
+    ; 	   ;(not (expired ?c))
+    ; 	   ;(not (violated ?c))
+    ; 	   (q)
+    ; 	 )
+    ; 
+    ;      ((conditional ?c) (detached ?c))
+    ;      ((satisfied ?c))
+    ;      1 
+    ;     )
+	(:operator (!satisfyConditional ?c)
+	 ( (commitment ?c)
+	   (conditional ?c)
+	   (gc ?c)
+	 )
+
+     ((conditional ?c))
+     ((satisfied ?c))
+     1 
+    )
+
+	(:operator (!satisfyDetached ?c)
+	 ( (commitment ?c)
+	   (detached ?c)
+	   (gc ?c)
+	 )
+
+     ((detached ?c))
+     ((satisfied ?c))
+     1 
+    )
+
+    (:operator (!timeoutviolate ?c)
+	 ( (commitment ?c)
+	   (detached ?c)
+	   (detachedtimeout))
+
+       ((detached ?c))
+       ((violated ?c))
+       1
+    )
+
+    (:operator (!cancel ?c)
+	 ( (commitment ?c)
+	   (conditional ?c))
+
+       ((conditional ?c))
+       ((terminated ?c))
+       1 
+    )
+
+
+    (:operator (!cancelviolate ?c)
+	 ( (commitment ?c)
+       (detached ?c))
+
+       ((detached ?c))
+       ((violated ?c))
+       1 
+    )
+
+(:operator (!achieve g1)
+	((paymentmade)
+	 (healthreporting)
+	 )
+	
+	()
+	((achieved g1))
+	1
+)
+
+    
+;=============================================
+; Goal transitions
+;=============================================
+
+
+
+  ; Regular transitions 
+  (:operator (!consider ?g)
+
+     ( (goal ?g)
+	   (null ?g))
+
+     ((null ?g))
+     ((inactive ?g))
+     1 
+  )
+
+  (:operator (!activate ?g)
+
+     ( (goal ?g)
+	   (inactive ?g))
+
+     ((inactive ?g))
+    ((active ?g))
+    1
+  )
+
+  (:operator (!suspendI ?g)
+
+     ( (goal ?g)
+	   (inactive ?g))
+
+     ((inactive ?g))
+     ((suspended ?g))
+     1 
+  )
+
+
+  (:operator (!suspendA ?g)
+
+     ( (goal ?g)
+	   (active ?g))
+
+     ((active ?g))
+     ((suspended ?g))
+    1
+  )
+
+
+  (:operator (!reconsider ?g)
+     ( (goal ?g)
+       (suspended ?g))
+
+     ((suspended ?g))
+     ((inactive ?g))
+     1 
+  )
+
+
+  (:operator (!reactivate ?g)
+     ( (goal ?g)
+       (suspended ?g))
+
+     ((suspended ?g))
+     ((active ?g))
+     1
+  )
+
+  (:operator (!dropOrAbortI ?g)
+
+     ( (goal ?g)
+       (inactive ?g))
+
+     ((inactive ?g))
+     ((terminated ?g))
+    1
+  )
+
+  (:operator (!dropOrAbortA ?g)
+
+     ( (goal ?g)
+	   (active ?g))
+
+     ((active ?g))
+     ((terminated ?g))
+     1
+  )
+
+  (:operator (!dropOrAbortU ?g)
+
+     ( (goal ?g)
+	   (suspended ?g))
+
+     ((suspended ?g))
+     ((terminated ?g))
+    1
+  )
+
+
+  (:operator (!failI ?g)
+
+     ( (goal ?g)
+	   (inactive ?g))
+
+     ((inactive ?g))
+     ((failed ?g))
+     1
+  )
+
+  (:operator (!failA ?g)
+
+     ( (goal ?g)
+	   (active ?g))
+
+     ((active ?g))
+     ((failed ?g))
+     1
+  )
+
+  (:operator (!failU ?g)
+
+     ( (goal ?g)
+       (suspended ?g))
+
+     ((suspended ?g))
+    ((failed ?g))
+    1
+  )
+
+
+  ;===
+  ; These are different for the different goals
+  ;===
+
+  ;********
+  ; endgoal
+  ;********
+
+  (:operator (!suceedIendgoal ?g)
+
+     ( (endgoal ?g)
+       (inactive ?g)
+       (s ?g))
+
+     ((inactive ?g))
+     ((satisfied ?g))
+    1
+  )
+
+
+  (:operator (!succeedAendgoal ?g)
+
+     ( (endgoal ?g)
+	   (active ?g)
+	   (s ?g))
+
+     ((active ?g))
+     ((satisfied ?g))
+     1
+  )
+
+  (:operator (!succeedUendgoal ?g)
+
+     ( (endgoal ?g)
+       (suspended ?g)
+       (s ?g)
+     )
+
+     ((suspended ?g))
+     ((satisfied ?g))
+     1
+  )
+
+  ;********
+  ; means goal
+  ;********
+
+  (:operator (!suceedImeansgoal ?g)
+
+     ( (meansgoal ?g)
+       (inactive ?g)
+       (s ?g)
+     )
+
+     ((inactive ?g))
+     ((satisfied ?g))
+     1
+  )
+
+
+  (:operator (!succeedAmeansgoal ?g)
+
+     ( (meansgoal ?g)
+       (active ?g)
+       (s ?g)
+     )
+
+     ((active ?g))
+    ((satisfied ?g))
+    1
+  )
+
+  (:operator (!succeedUmeansgoal ?g)
+
+     ( (meansgoal ?g)
+        (suspended ?g)
+		(s ?g)
+	 )
+
+     ((suspended ?g))
+     ((satisfied ?g))
+     1
+  )
+
+
+  ;****************
+  ; discharge goal
+  ;****************
+
+  (:operator (!suceedIdisgoal ?g)
+
+     ( (disgoal ?g)
+	   (inactive ?g)
+	   (q)
+	 )
+
+     ((inactive ?g))
+     ((satisfied ?g))
+     1
+  )
+
+
+  (:operator (!succeedAdisgoal ?g)
+
+     ( (disgoal ?g)
+       (active ?g)
+       (q)
+     )
+
+     ((active ?g))
+     ((satisfied ?g))
+     1
+  )
+
+  (:operator (!succeedUdisgoal ?g)
+
+     ( (disgoal ?g)
+       (suspended ?g)
+       (q)
+     )
+
+     ((suspended ?g))
+     ((satisfied ?g))
+     1
+  )
+
+
+;=============================================
+; Domain operations
+;=============================================
+    
+  (:operator (!bringAboutp)
+     (not (p))
+  
+     ()
+     ((p))
+    1
+  )
+
+  (:operator (!bringAboutq)
+     (not (q))
+     ()
+     ((q))
+    1 
+  )
+
+  (:operator (!activetimeoutoccurs)
+     (not (activetimeout))
+     ()
+    ((activetimeout))
+    1
+  )
+
+  (:operator (!detachedtimeoutoccurs)
+     (not (detachedtimeout))
+     ()
+    ((detachedtimeout))
+    1
+  )
+
+
+  ;; Task Networks
+	; (:method (accommodation ?name ?location)
+	; 	         ; Precondition Start
+	; 	         nil ;((not (booked ?name ?hotel))) ; Precondition End
+	; 		     ; Task List Start
+	; 		     ((!accommodate ?name ?location)) ; Task List End
+	; 	) ; End Method
+	
+	;-----------------------------------------------------------------------------
+	;; Methods on Commitments
+	;-----------------------------------------------------------------------------
+	
+	;; Method to create a commitment
+	(:method (create ?c)
+		         ; Precondition Start
+		         ((commitment ?c) (null ?c) (not (ga ?c))) ; Precondition End
+			     ; Task List Start
+			     ((!createConditional ?c)) ; Task List End
+				
+				 ; Precondition Start
+		         ((commitment ?c) (null ?c) (ga ?c)) ; Precondition End
+			     ; Task List Start
+			     ((!createDetached ?c)) ; Task List End
+		) ; End Method
+		
+	;;Method to suspend a commitment
+	(:method (suspend ?c)
+		         ; Precondition Start
+		         ((commitment ?c) (conditional ?c)) ; Precondition End
+			     ; Task List Start
+			     ((!suspendConditional ?c)) ; Task List End
+				
+				
+				 ; Precondition Start
+		         ((commitment ?c) (detached ?c)) ; Precondition End
+			     ; Task List Start
+			     ((!suspendDetached ?c)) ; Task List End
+		) ; End Method
+	
+	;Method to cancel a commitment
+	(:method (cancel ?c)
+		((commitment ?c) (conditional ?c))
+		((!cancel ?c))
+		
+		((commitment ?c) (detached ?c))
+		((!cancelviolate ?c))
+	); End Method
+	
+	;Method to reactivate a commitment
+	(:method (reactivate ?c)
+		((commitment ?c) (pending ?c) (not (ga ?c)))
+		((!reactivateConditional ?c))
+		
+		((commitment ?c) (pending ?c) (ga ?c))
+		((!reactivateDetached ?c))
+	); End Method
+	
+	;Method to satisfy a commitment
+	(:method (satisfy ?c)
+		((commitment ?c) (conditional ?c))
+		((!satisfyConditional ?c))
+		
+		((commitment ?c) (detached ?c))
+		((!satisfyDetached ?c))
+	) ; End Method
+	
+	;-----------------------------------------------------------------------------
+	;; Methods on Goals
+	;-----------------------------------------------------------------------------
+	
+	;Method to drop a goal
+	(:method (drop ?g)
+		((goal ?g) (inactive ?g))
+		((!dropOrAbortI ?g))
+		
+		((goal ?g) (active ?g))
+		((!dropOrAbortA ?g))
+		
+		((goal ?g) (suspended ?g))
+		((!dropOrAbortU ?g))
+	) ;End Method
+	
+	;Method to fail a goal
+	(:method (fail ?g)
+		((goal ?g) (inactive ?g))
+		((!failI ?g))
+		
+		((goal ?g) (active ?g))
+		((!failA ?g))
+		
+		((goal ?g) (suspended ?g))
+		((!failU ?g))
+	) ;End Method
+	
+	;-----------------------------------------------------------------------------
+	;; Methods on Commitments and Goals
+	;-----------------------------------------------------------------------------
+   	(:method (entice ?g ?c)
+		         ; Precondition Start
+		         ((goal ?g) (active ?g) (commitment ?c) (null ?c)) ; Precondition End
+			
+			     ; Task List Start
+			     ((create ?c)) ; Task List End
+		) ; End Method
+	
+		
+	(:method (suspendOffer ?g ?c)
+			; Precondition Start
+	         ((goal ?g) (suspended ?g) (commitment ?c) (active ?c)) ; Precondition End
+		
+		     ; Task List Start
+		     ((suspend ?c)) ; Task List End
+	) ; End Method
+	
+	(:method (revive ?g ?c)
+			; Precondition Start
+	         ((goal ?g) (active ?g) (commitment ?c) (pending ?c)) ; Precondition End
+
+		     ; Task List Start
+		     ((reactivate ?c)) ; Task List End
+	) ; End Method
+	
+	(:method (withdrawOffer ?g ?c)
+			; Precondition Start
+	         ((goal ?g) (terminated ?g) (commitment ?c) (active ?c)) ; Precondition End
+
+		    ; Task List Start
+		    ((cancel ?c)) ; Task List End
+			
+			; Precondition Start
+	         ((goal ?g) (failed ?g) (commitment ?c) (active ?c)) ; Precondition End
+
+		    ; Task List Start
+		    ((cancel ?c)) ; Task List End
+	) ; End Method
+	
+	(:method (reviveToWithdraw ?g ?c)
+			; Precondition Start
+	         ((goal ?g) (terminated ?g) (commitment ?c) (pending ?c)) ; Precondition End
+
+		    ; Task List Start
+		    ((reactivate ?c)) ; Task List End
+			
+			; Precondition Start
+	         ((goal ?g) (failed ?g) (commitment ?c) (pending ?c)) ; Precondition End
+
+		    ; Task List Start
+		    ((reactivate ?c)) ; Task List End
+	) ; End Method
+	
+	(:method (negotiate ?g ?c ?c2)
+			; Combinations of (A v U) and (E v T): AE AT UE UT
+			; Precondition Start
+	         ((goal ?g) (active ?g) (commitment ?c) (expired ?c) (commitment ?c2) (null ?c2)) ; Precondition End
+		    ; Task List Start
+		    ((create ?c2)) ; Task List End
+			
+			; Precondition Start
+	         ((goal ?g) (active ?g) (commitment ?c) (terminated ?c) (commitment ?c2)) ; Precondition End
+		    ; Task List Start
+		    ((create ?c2)) ; Task List End
+			
+			; Precondition Start
+	         ((goal ?g) (suspended ?g) (commitment ?c) (expired ?c) (commitment ?c2)) ; Precondition End
+		    ; Task List Start
+		    ((create ?c2)) ; Task List End
+			
+			; Precondition Start
+	         ((goal ?g) (suspended ?g) (commitment ?c) (terminated ?c) (commitment ?c2)) ; Precondition End
+		    ; Task List Start
+		    ((create ?c2)) ; Task List End
+	) ; End Method
+	
+	(:method (abandonEndGoal ?g ?c)
+        ; Combinations of (A v U) and (E v T): AE AT UE UT
+		; Precondition Start
+         ((goal ?g) (active ?g) (commitment ?c) (expired ?c)) ; Precondition End
+	    ; Task List Start
+	    ((drop ?g)) ; Task List End
+		
+		; Precondition Start
+         ((goal ?g) (active ?g) (commitment ?c) (terminated ?c)) ; Precondition End
+	    ; Task List Start
+	    ((drop ?g)) ; Task List End
+		
+		; Precondition Start
+         ((goal ?g) (suspended ?g) (commitment ?c) (expired ?c)) ; Precondition End
+	    ; Task List Start
+	    ((drop ?g)) ; Task List End
+		
+		; Precondition Start
+         ((goal ?g) (suspended ?g) (commitment ?c) (terminated ?c)) ; Precondition End
+	    ; Task List Start
+	    ((drop ?g)) ; Task List End
+	) ; End Method
+	
+	
+	;Deliver and Deliver' are encoded in a single method
+	(:method (deliver ?g ?c)
+	     ; Precondition Start
+         ((goal ?g) (null ?g) (commitment ?c) (detached ?c))
+		 ; Precondition End
+	     ; Task List Start
+	     ((!consider ?g) (!activate ?g)) ; Task List End
+		
+		; Deliver'
+		; Precondition Start
+        ((goal ?g) (inactive ?g) (commitment ?c) (detached ?c))
+	 	; Precondition End
+     	; Task List Start
+	    ((!activate ?g)) ; Task List End
+	) ; End Method
+	
+	(:method (backBurner ?g ?c)
+	    ; Precondition
+		((goal ?g) (active ?g) (commitment ?c) (pending ?c))
+		; Task List
+		((suspend ?g))
+	) ; End Method
+	
+	(:method (frontBurner ?g ?c)
+	    ; Precondition
+		((goal ?g) (suspended ?g) (commitment ?c) (detached ?c))
+		; Task List
+		((reactivate ?g))
+	) ; End Method
+	
+	(:method (abandonMeansGoal ?g ?c)
+        ; Precondition
+		((goal ?g) (active ?g) (commitment ?c) (terminated ?c))
+		; Task List
+		((drop ?g))
+		
+		; Precondition
+		((goal ?g) (active ?g) (commitment ?c) (violated ?c))
+		; Task List
+		((drop ?g))
+	) ; End Method
+	
+	(:method (persist ?g ?c ?g2)
+	    ; Precondition
+		((goal ?g) (terminated ?g) (commitment ?c) (detached ?c) (goal ?g2) (null ?g2))
+		; Task List
+		((!consider ?g2) (!activate ?g2))
+		
+		; Precondition
+		((goal ?g) (failed ?g) (commitment ?c) (detached ?c) (goal ?g2) (null ?g2))
+		; Task List
+		((!consider ?g2) (!activate ?g2))
+	) ; End Method
+	
+	(:method (giveUp ?g ?c)
+	    ; Precondition
+		((goal ?g) (terminated ?g) (commitment ?c) (detached ?c))
+		; Task List
+		((!cancel ?c))
+		
+		; Precondition
+		((goal ?g) (failed ?g) (commitment ?c) (detached ?c))
+		; Task List
+		((!cancel ?c))
+	) ; End Method
+	
+ )
+
+)
