@@ -1,0 +1,121 @@
+(defproblem pba1 cgrulesAftermarket
+	(
+	 (commitment c1) 
+	 (commitmentType c1 c1) 
+     (null c1)
+	 (goal g1)
+	 (goalType g1 g1)
+	 ) ;Initial State
+	
+	(
+	 (!paymentMade)
+	 (!consider g1);Conditional
+	 ;(entice g1 c1)
+	) ;initial HTN
+	
+	; (
+	;  (null c1)
+	;  (commitment c1) 
+	;  (commitmentType c1 c1) 
+	;  (goal g1)
+	;  (goalType g1 g1)
+	;  (paymentMade) (healthReportingPromised)
+	;  ) ;Initial State
+	; 
+	; (
+	;  (create c1);Detached
+	; ) ;initial HTN
+	
+	; (
+	; 	 (commitment c1) 
+	; 	 (commitmentType c1 c1) 
+	;      (null c1)
+	; 	 (goal g1)
+	; 	 (goalType g1 g1)
+	; 	 ) ;Initial State
+	; 	
+	; 	(
+	; 	 (create c1);Conditional
+	;      (suspend c1)
+	; 	) ;initial HTN
+	; 	
+	; 	(
+	; 	 (null c1)
+	; 	 (commitment c1) 
+	; 	 (commitmentType c1 c1) 
+	; 	 (goal g1)
+	; 	 (goalType g1 g1)
+	; 	 (paymentMade) (healthReportingPromised)
+	; 	 ) ;Initial State
+	; 	
+	; 	(
+	; 	 (create c1);Detached
+	;      (suspend c1)
+	; 	) ;initial HTN
+	; 	
+	; 	;; To reactivate
+	; 	
+	; 	(
+	; 	 (null c1)
+	; 	 (commitment c1) 
+	; 	 (commitmentType c1 c1) 
+	; 	 (goal g1)
+	; 	 (goalType g1 g1)
+	; 	 ; (paymentMade) (healthReportingPromised)
+	; 	 ) ;Initial State
+	; 	
+	; 	(
+	; 	 (create c1);Conditional
+	;      (suspend c1)
+	;      (reactivate c1)
+	; 	) ;initial HTN
+	; 	
+	; 	(
+	; 	 (null c1)
+	; 	 (commitment c1) 
+	; 	 (commitmentType c1 c1) 
+	; 	 (goal g1)
+	; 	 (goalType g1 g1)
+	; 	 (paymentMade) (healthReportingPromised)
+	; 	 ) ;Initial State
+	; 	
+	; 	(
+	; 	 (create c1);Detached
+	;      (suspend c1)
+	;      (reactivate c1)
+	; 	) ;initial HTN
+	; 	
+	; 	;; To cancel
+	; 	
+	; 	(
+	; 	 (null c1)
+	; 	 (commitment c1) 
+	; 	 (commitmentType c1 c1) 
+	; 	 (goal g1)
+	; 	 (goalType g1 g1)
+	; 	 ; (paymentMade) (healthReportingPromised)
+	; 	 ) ;Initial State
+	; 	
+	; 	(
+	; 	 (create c1);Conditional
+	;      (suspend c1)
+	;      (reactivate c1)
+	;      (cancel c1)
+	; 	) ;initial HTN
+	; 	
+	; 	(
+	; 	 (null c1)
+	; 	 (commitment c1) 
+	; 	 (commitmentType c1 c1) 
+	; 	 (goal g1)
+	; 	 (goalType g1 g1)
+	; 	 (paymentMade) (healthReportingPromised)
+	; 	 ) ;Initial State
+	; 	
+	; 	(
+	; 	 (create c1);Detached
+	;      (suspend c1)
+	;      (reactivate c1)
+	;      (cancel c1)
+	; 	) ;initial HTN
+)

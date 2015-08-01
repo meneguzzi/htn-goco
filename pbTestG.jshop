@@ -1,0 +1,82 @@
+(defproblem pbtestg cg
+		(
+		 (goal g1 m)
+		 (goalType g1 G1)
+		 (null g1)
+	 
+		(agent m)
+		(agent c)
+    
+		 ) ;Preconds
+	
+		(
+		 (testGoal g1 null)
+		 (!consider g1 m) (testGoal g1 inactive) (testGoal g1 nactive) (testGoal g1 nsuspended)
+		 (!activate g1 m) (testGoal g1 active) (testGoal g1 ninactive) (testGoal g1 nsuspended)
+		 (!suspend g1 m) (testGoal g1 suspended) (testGoal g1 nactive) (testGoal g1 ninactive)
+		 (!reactivate g1 m) (testGoal g1 active) (testGoal g1 ninactive) (testGoal g1 nsuspended)
+		 (!sendPayment c m) (testGoal g1 satisfied) (testGoal g1 nactive) (testGoal g1 ninactive)
+		) ;initial HTN
+)
+
+; Brief description of the fluents in this domain
+ ; (goal ?g ?a) - ?g is a goal of agent ?a
+ ; (goalType ?g ?t) - ?g is a goal of type ?t
+ ; (commitment ?c ?d ?a) - ?c is a commitment of agent ?d towards agent ?a
+ ; (commitmentType ?c ?t) - ?c is a commitment of type ?t
+	
+ ; (s ?g) - a rule stating that the success condition for goal ?g is satisfied
+ ; (f ?g) - a rule stating that the failure condition for goal ?g is satisfied
+	
+ ; (p ?c) - a rule stating that the antecedent of commitment ?c is satisfied
+ ; (q ?c) - a rule stating that the consequent of commitment ?c is satisfied
+	
+ ; (eqGSCP ?g ?c) - a rule stating that the success condition of goal ?g (s ?g) is linked to the antecedent condition of commitment ?c (p ?c).
+
+ ; States of commitments
+ ; (null ?c)
+ ; (detached ?c)
+ ; (conditional ?c)
+ ; (expired ?c)
+ ; (pending ?c)
+ ; (violated ?c)
+ ; (terminated ?c)
+ ; (active ?c) -- Which is either conditional or detached
+ ; (satisfied ?c)
+
+ ; States of goals
+ ; (null ?g)
+ ; (inactive ?g)
+ ; (active ?g)
+ ; (suspended ?g)
+ ; (terminated ?g)
+ ; (satisfied ?g)
+ ; (failed ?g)
+
+
+ ;=======================================================================================
+ ; Purchase model for goals and commitments
+ ;========================================================================================
+
+ ; == Goals ==
+ ; G(x, s, f) - x: agent, s: successcondition, f: failurecondition
+
+ ; Merchant
+ ; G1 = G(m, goodsc, deadlinec)
+
+ ; Customer
+ ; G2 = G(c, payc, deadlinem)
+ ; G3 = G(c, goodsc, deadlinec)
+
+ ; == Commitments ==
+ ; C(x, y, p, q) - x: debtor, y: creditor, p: antecedent, q: consequent
+ 
+ ; Merchant
+ ; C1 = C(m, c, payc, goodsc)
+ ; C2 = C(m, c, acceptedc, goodsc)
+ ; C3 = C(m, c, returnedc, goodsc)
+ ; C4 = C(m, c, returnedc, refundc)
+
+ ; Customer
+ ; C5 = C(c, m, goodsc, payc)
+ ; C6 = C(c, m, goods, pay)

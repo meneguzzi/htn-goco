@@ -1,0 +1,12 @@
+(defproblem pb2 cg
+	(
+	 (commitment c1) 
+     (null c1)
+	 ;(p)
+	 ) ;Initial State
+	
+	(
+	 (create c1)
+	 (suspend c1)
+	) ;initial HTN
+)

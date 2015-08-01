@@ -1,0 +1,28 @@
+(defproblem pbfo1 cgfo
+	(
+	 (goal g1 G1 m)
+	 (goal g2 G2 c)
+	 (goal g3 G3 m)
+	 (goal g4 G4 c)
+	 
+	 (commitment c1 C1 m c)
+	 (commitment c2 C2 m c)	
+	 ; (commitment c3 C3 m c)
+	 ; (commitment c4 C4 m c)
+	    (commitment c5 C5 c m)
+	 ; (commitment c6 C6 c m)
+	
+	(agent m)
+	(agent c)
+	; (goods m t1)
+	
+	(needsgoods c t1)
+	);Preconds	
+	(
+	  (!consider g1 G1 m (t1)) 
+	  (!activate g1 G1 m (t1)) 
+		  (testGoalCommitmentRule eqGSCP g1 G1 m c1 C1 m c) 
+	  (achieveGoal g1 G1 m (t1)) 
+	) ;initial HTN
+)
+

@@ -1,0 +1,10 @@
+(defproblem pb1 cg
+	(
+	 (commitment c1) 
+     (null c1)
+	 ) ;Preconds
+	
+	(
+	 (create c1)
+	) ;initial HTN
+)

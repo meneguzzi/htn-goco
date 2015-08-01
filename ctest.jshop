@@ -1,0 +1,26 @@
+; A JSHOP test domain to see if lists can be used as action parameters
+(defdomain ctest
+	;() ;Axioms
+	(
+	(:operator (!test1 ?a (?b ?c) )
+	   ((p ?a) )
+	   ((q ?b) )
+	   ((r ?c) )
+	   0
+	)
+	
+	(:operator (!test1 ?a (?b) )
+	   ((p ?a) )
+	   ((q ?b) )
+	   ((r ?b) )
+	   0
+	)
+	
+	(:method (task1 ?a ?b)
+		((p ?a) (li ?l) )
+		((!test1 ?a ?l))
+	)
+	)
+	
+	
+)

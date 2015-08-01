@@ -1,0 +1,828 @@
+(defdomain cgfo ; commitments and goals in a first order representation
+ (
+
+ ; Brief description of the fluents in this domain
+ ; (goal ?g gi ?a) - ?g is a goal of agent ?a
+ ; (commitment ?c ?ci ?de ?cr) - ?c is a commitment of agent ?d towards agent ?a
+
+ ; (pg ?g ?gi ?gv) - a rule stating that the precondition for goal ?g
+ ; is satisfied
+
+ ; (s ?g ?gi ?gv) - a rule stating that the success condition for goal
+ ; ?g is satisfied
+
+ ; (f ?g ?gi ?gv) - a rule stating that the failure condition for goal
+ ; ?g is satisfied
+	
+ ; (p ?c) - a rule stating that the antecedent of commitment ?c is
+ ; satisfied
+
+ ; (q ?c) - a rule stating that the consequent of commitment ?c is
+ ; satisfied
+	
+ ; (eqGSCP ?g ?c) - a rule stating that the success condition of goal
+ ; ?g (s ?g ?gi ?gv) is linked to the antecedent condition of
+ ; commitment ?c (p ?c ?ci ?cv).
+
+ ; States of commitments
+ ; (null ?c)
+ ; (detached ?c ?ci ?cv)
+ ; (conditional ?c ?ci ?cv)
+ ; (expired ?c ?ci ?cv)
+ ; (pending ?c ?ci ?cv)
+ ; (violated ?c ?ci ?cv)
+ ; (terminated ?c ?ci ?cv)
+ ; (active ?c ?ci ?cv) -- Which is either conditional or detached
+ ; (satisfied ?c ?ci ?cv)
+
+ ; States of goals
+ ; (null ?g ?gi ?gv)
+ ; (inactive ?g)
+ ; (active ?g)
+ ; (suspended ?g)
+ ; (terminated ?g)
+ ; (satisfied ?g)
+ ; (failed ?g ?gi ?gv)
+
+
+ ;=============================================================
+ ; Purchase model for goals and commitments
+ ;=============================================================
+
+ ; == Goals ==
+ ; G(gi, x, pg, s, f) - x: agent, pg: precondition,
+ ; s: successcondition, f: failurecondition
+
+ ; Merchant
+ ; G1 = G(M, T, paid(C), deadline(C))
+ ; G3 = G(M, paid(C), goods(C), deadline(C)) 
+
+ ; Customer
+ ; G2 = G(C, needsgoods(C), goods(C), deadline(C))
+ ; G4 = G(c, goods(C), paid(C), deadline(C))
+
+ ; == Commitments ==
+ ; C(ci, x, y, p, q) - x: debtor, y: creditor, p: antecedent,
+ ; q: consequent
+ 
+ ; Merchant
+ ; C1 = C(M, C, pay(C), goods(C))
+ ; C2 = C(M, C, accepted(C), goods(C))
+ ; C3 = C(M, C, returned(C), goods(C))
+ ; C4 = C(M, C, returned(C), refund(C))
+
+ ; Customer
+ ; C5 = C(C, M, goods(C), pay(C))
+ ; C6 = C(C, M, accepted(C), goods(C))
+
+ ;=============================================================
+
+
+ ;=========
+ ; Goals
+ ;=========
+
+ ; Merchant
+ ; G1 = G(m, T, paid(c), deadline(c))
+
+ (:- (pg ?g G1 (?t)) (and (goal ?g ?gi ?a) ) )
+ (:- (s ?g G1 (?t)) (and (goal ?g ?gi ?a) (paid ?x ?t)))
+ (:- (f ?g G1 (?t)) (and (goal ?g ?gi ?a) (deadline ?t)))
+
+
+ ; G3 = G(M, paid(C), goods(C), deadline(C)) 
+ (:- (pg ?g G3 (?t)) (and (goal ?g ?gi ?a) (paid ?x ?t)))
+ (:- (s ?g G3 (?t)) (and (goal ?g ?gi ?a) (goods ?x ?t)))
+ (:- (f ?g G3 (?t)) (and (goal ?g ?gi ?a) (deadline ?t)))
+
+ ; Customer
+ ; G2 = G(C, needsgoods(C), goods(C), deadline(C))
+ (:- (pg ?g G2 (?t)) (and (goal ?g ?gi ?a) (needsgoods ?a ?t)))
+ (:- (s ?g G2 (?t)) (and (goal ?g ?gi ?a) (goods ?a ?t)))
+ (:- (f ?g G2 (?t)) (and (goal ?g ?gi ?a) (deadline ?t)))
+
+ ; G4 = G(c, goods(C), paid(C), deadline(C))
+ (:- (pg ?g G4 (?t)) (and (goal ?g ?gi ?a) (goods ?g ?t)))
+ (:- (s ?g G4 (?t)) (and (goal ?g ?gi ?a)  (paid ?g ?t)))
+ (:- (f ?g G4 (?t)) (and (goal ?g ?gi ?a)  (deadline ?t)))
+
+ ;============
+ ; Commitments
+ ;============
+
+ ; Merchant
+ ; C1 = C(M, C, pay(C), goods(C))
+ (:- (p ?c C1 (?t)) (and (commitment ?c ?ci ?d ?a) (paid ?a ?t))) 
+ (:- (q ?c C1 (?t)) (and (commitment ?c ?ci ?d ?a) (goods ?a ?t)))
+
+
+ ; C2 = C(M, C, accepted(C), goods(C))
+ ; (:- (p ?c C2 (?cl)) (and (commitment ?c ?ci ?d ?a) (accepted ?cl))) 
+ ; (:- (q ?c C2 (?cl)) (and (commitment ?c ?ci ?d ?a) (goods ?d ?cl)))
+
+ ; C3 = C(M, C, returned(C), goods(C))
+ (:- (p ?c C3 (?t)) (and (commitment ?c ?ci ?d ?a) (returned ?d ?t))) 
+ (:- (q ?c C3 (?t)) (and (commitment ?c ?ci ?d ?a) (goods ?d ?t)))
+
+ ; C4 = C(M, C, returned(C), refund(C))
+ (:- (p ?c C4 (?t)) (and (commitment ?c ?ci ?d ?a) (returned ?d ?t))) 
+ (:- (q ?c C4 (?t)) (and (commitment ?c ?ci ?d ?a) (refund ?d ?t)))
+
+ ; Customer
+ ; C5 = C(C, M, goods(C), pay(C))
+ (:- (p ?c C5 (?t)) (and (commitment ?c ?ci ?d ?a) (goods ?d ?t)) ) 
+ (:- (q ?c C5 (?t)) (and (commitment ?c ?ci ?d ?a) (paid ?d ?t)) )
+
+
+ ; C6 = C(C, M, accepted(C), goods(C))
+ ; (:- (p ?c C6 (?cl)) (and (commitment ?c ?ci ?d ?a) (accepted ?cl))) 
+ ; (:- (q ?c C6 (?cl)) (and (commitment ?c ?ci ?d ?a) (goods ?d ?cl)))
+ 
+
+  ;==========================================================
+  ;Equalities between conditions on commitments and on goals
+  ;==========================================================
+
+
+  ; True if the success condition of ?g matches the antecedent of ?c
+  ; (?gv and ?cv will unify with the specific instance of ?g and ?c
+  ; that match this)
+  (:- (eqGSCP ?g ?gv ?c ?cv) 
+      (and (imply (s ?g ?gi ?gv) (p ?c ?ci ?cv)) 
+           (imply (p ?c ?ci ?cv) (s ?g ?gi ?gv)))) 
+
+  ; True of the success condition of ?g matches the consequent of ?c
+  (:- (eqGSCQ ?g ?gv ?c ?cv) 
+      (and (imply (s ?g ?gi ?gv) (q ?c ?ci ?cv)) 
+           (imply (q ?c ?ci ?cv) (s ?g ?gi ?gv))))
+
+  ; True of the the antecedent of commitment ?c1 matches the
+  ; consequent of commitment ?c2 (so they are reciprocal)
+  (:- (eqCPCQ ?c1 ?cv1 ?c2 ?cv2) 
+      (and (imply (p ?c1 ?ci1 ?cv1) (q ?c2 ?ci2 ?cv2)) 
+      	   (imply (q ?c2 ?ci2 ?cv2) (p ?c1 ?ci1 ?cv1))))
+	
+  (:- (goalPossible ?g ?gi ?gv) 
+      (and (goal ?g ?gi ?a) (pg ?g  ?gi ?gv)))
+	
+
+  ; An operator to make test if a rule worked OK
+  (:operator (!!testRuleSuccess ?rule ?pars)
+	  ()
+	  ()
+	  ()
+	  0
+  )
+  ;==========================================================
+  ; Rules for time passing when I want to model deadlines
+  ;==========================================================
+  ;(:- (eqGSCP ?g ?c) 
+  ;    (and (imply (s ?g ?gi ?gv) (p ?c ?ci ?cv)) 
+  ;    	    (imply (p ?c ?ci ?cv) (s ?g ?gi ?gv))))
+
+ ;==================
+ ; Operator syntax
+ ;==================
+
+ ; (:operator (!name ?arg)
+ ;            () ; Precondition
+ ; 	      () ; Delete List
+ ; 	      () ; Add List
+ ; 	       1 ; Cost
+ ; )
+
+ ;==================
+
+
+ ;===========
+ ; Operators	     
+ ;===========
+
+;=============================================
+; Domain operators (and axioms)
+;=============================================
+
+ (:operator (!!testCondition ?c)
+    (?c)
+
+    ()
+    ()
+    0
+ )
+
+ (:operator (!sendOrder ?a ?d ?t)
+   (and (not (goods(?d ?t))) (agent ?a) (agent ?d) 
+   	(call = ?a c) (call = ?d m))
+   ()
+   ((order ?a ?t))
+   1
+ )
+
+ (:operator (!sendGoods ?a ?d ?t)
+    (and (not (goods ?a ?t)) (agent ?a) (agent ?d) 
+    	 (call = ?a m) (call = ?d c))
+    ()
+    ((goods ?d ?t))
+    1
+ )
+
+ (:operator (!sendPayment ?a ?d ?t)
+   (and (agent ?a) (agent ?d) 
+   	(call = ?a c) (call = ?d m))
+   ()
+   ((paid ?a ?t))
+   1
+ )
+
+ (:operator (!sendReturn ?a ?d ?t)
+   (and (goods ?t) (agent ?a) (agent ?d) 
+   	(call = ?a c) (call = ?d m))
+   ((goods ?a ?t))
+   ()
+   1
+ )
+
+ (:operator (!sendRefund ?a ?d ?t)
+   (and (not (goods ?t)) (agent ?a) (agent ?d) 
+   	(call = ?a m) (call = ?d c))
+   ((paid ?d ?t))
+   ()
+   2
+ )
+
+ (:operator (!manufactureGoods ?a ?t)
+   (and (not (goods ?a ?t)) (agent ?a) (call = ?a c))
+   ()
+   ((goods ?a ?t))
+   10
+ )
+
+;=============================================
+; Axioms for commitments
+; predicates on commitments 
+; null(c,ci,cv) cancelled(c,ci,cv) released(c,ci,cv) 
+; pending(c,ci,cv) satisfied(c,ci,cv)
+;=============================================
+
+  (:- (null ?c ?ci ?cv)         
+        (and (not (created ?c ?ci ?cv))
+	     (not (p ?c ?ci ?cv))
+	     (not (q ?c ?ci ?cv))
+	     (not (antfail ?c ?ci ?cv))
+	     (not (suspended ?c ?ci ?cv))
+	     (not (cancelled ?c ?ci ?cv))
+	     (not (released ?c ?ci ?cv))
+	     (not (cancelviolated ?c ?ci ?cv))))
+
+  (:- (conditional ?c ?ci ?cv) 
+        (and (created ?c ?ci ?cv) 
+	     (not (p ?c ?ci ?cv))
+	     (not (q ?c ?ci ?cv))
+	     (not (antfail ?c ?ci ?cv))
+	     (not (suspended ?c ?ci ?cv))
+	     (not (cancelled ?c ?ci ?cv))
+	     (not (released ?c ?ci ?cv))
+	     (not (cancelviolated ?c ?ci ?cv))))
+
+  (:- (detached ?c ?ci ?cv) 
+        (and (created ?c ?ci ?cv) 
+	     (p ?c ?ci ?cv)
+	     (not (q ?c ?ci ?cv))
+	     (not (antfail ?c ?ci ?cv))
+	     (not (suspended ?c ?ci ?cv))
+	     (not (cancelled ?c ?ci ?cv))
+	     (not (released ?c ?ci ?cv))
+	     (not (cancelviolated ?c ?ci ?cv))))
+
+  (:- (active ?c ?ci ?cv) (or (conditional ?c ?ci ?cv) 
+      	      	     	      (detached ?c ?ci ?cv)))
+
+  (:- (terminated ? c ?ci ?cv)
+        (and (created ?c ?ci ?cv) 
+	     (not (q ?c ?ci ?cv))
+	     (not (antfail ?c ?ci ?cv))
+	     (not (suspended ?c ?ci ?cv))
+	     (or (cancelled ?c ?ci ?cv)(released ?c ?ci ?cv))
+	     (not (cancelviolated ?c ?ci ?cv))))
+				   
+
+  (:- (violated ?c ?ci ?cv)
+        (and (created ?c ?ci ?cv) 
+	     (p ?c ?ci ?cv)
+	     (not (q ?c ?ci ?cv))
+	     (not (antfail ?c ?ci ?cv))
+	     (not (suspended ?c ?ci ?cv))
+	     (not (cancelled ?c ?ci ?cv))
+	     (not (released ?c ?ci ?cv))
+	     (cancelviolated ?c ?ci ?cv)))
+
+  (:- (satisfied ?c ?ci ?cv)
+        (and (created ?c ?ci ?cv) 
+	     (q ?c ?ci ?cv)
+	     (not (antfail ?c ?ci ?cv))
+	     (not (suspended ?c ?ci ?cv))
+	     (not (cancelled ?c ?ci ?cv))
+	     (not (released ?c ?ci ?cv))
+	     (not (cancelviolated ?c ?ci ?cv))))
+
+  (:- (expired ?c ?ci ?cv) 
+        (and (created ?c ?ci ?cv) 
+	     (not (p ?c ?ci ?cv))
+	     (not (q ?c ?ci ?cv))
+	     (antfail ?c ?ci ?cv)
+	     (not (suspended ?c ?ci ?cv))
+	     (not (cancelled ?c ?ci ?cv))
+	     (not (released ?c ?ci ?cv))
+	     (not (cancelviolated ?c ?ci ?cv))))
+
+  (:- (pending ?c ?ci ?cv)
+        (and (created ?c ?ci ?cv) 
+	     (not (q ?c ?ci ?cv))
+	     (not (antfail ?c ?ci ?cv))
+	     (suspended ?c ?ci ?cv)
+	     (not (cancelled ?c ?ci ?cv))
+	     (not (released ?c ?ci ?cv))
+	     (not (cancelviolated ?c ?ci ?cv))))
+
+
+  ; We may not need this rule. A rule to enumerate that certain states are terimnal
+  ;(:- (terminal ?c ?ci ?cv) 
+  ;    (and (commitment ?c ?ci ?de ?cr) 
+  ;         (or (cancelled ?c ?ci ?cv) (released ?c ?ci ?cv) (expired ?c ?ci ?cv))))
+
+ ;======================
+ ; Commitment operators
+ ;======================
+
+  (:operator (!!testSuccess ?c ?ci ?cv ?state)
+	(commitment ?c ?ci ?de ?cr) 	
+	()
+	()
+	0
+  )
+
+  (:operator (!create ?c ?ci ?de ?cr ?cv)
+    ((commitment ?c ?ci ?de ?cr)(null ?c ?ci ?cv))
+    ()
+    ((created ?c ?ci ?cv) )
+    0
+  )
+
+  (:operator (!suspend ?c ?ci ?de ?cr ?cv)
+    ((commitment ?c ?ci ?de ?cr)(active ?c ?ci ?cv))
+    ()
+    ((suspended ?c ?ci ?cv))
+    1 
+  )
+
+  (:operator (!reactivate ?c ?ci ?de ?cr ?cv)
+    ((commitment ?c ?ci ?de ?cr) (pending ?c ?ci ?cv))
+    ((suspended ?c ?ci ?cv))
+    ()
+    1
+  )
+
+  ;PT: Can we have two operators with the same name but
+  ; different preconditions?
+
+  (:operator (!cancel ?c ?ci ?de ?cr ?cv)
+    ((commitment ?c ?ci ?de ?cr) (conditional ?c ?ci ?cv))
+    ()
+    ((cancelled ?c ?ci ?cv))
+    10
+  )
+
+  (:operator (!cancel ?c ?ci ?de ?cr ?cv)
+    ((commitment ?c ?ci ?de ?cr) (detached ?c ?ci ?cv))
+    ()
+    ((cancelviolated ?c ?ci ?cv))
+    10
+  )
+
+  (:operator (!release ?c ?ci ?de ?cr ?cv)
+    ((commitment ?c ?ci ?de ?cr) (active ?c ?ci ?cv))
+    ()
+    ((released ?c ?ci ?cv))
+    1 
+  )
+
+
+;=============================================
+; Axioms for goals
+; predicates on goals - null(g,gi,gv) suspendedG(g,gi,gv) 
+; aborted(g,gi,gv) dropped(g,gi,gv) satisfiedG(g,gi,gv)
+;=============================================
+
+  (:- (nullG ?g ?gi ?gv) 
+        (and (not (considered ?g ?gi ?gv))
+	     (not (activated ?g ?gi ?gv))
+	     (not (suspended ?g ?gi ?gv))
+	     (not (reconsidered ?g ?gi ?gv))
+	     (not (reactivated ?g ?gi ?gv))
+	     (not (dropped ?g ?gi ?gv))
+	     (not (aborted ?g ?gi ?gv))
+	     (not (f ?g ?gi ?gv))
+	     (not (s ?g ?gi ?gv))))
+
+  (:- (inactiveG ?g ?gi ?gv) 
+        (and (or (considered ?g ?gi ?gv) (reconsidered ?g ?gi ?gv))
+	     (not (activated ?g ?gi ?gv))
+	     (not (suspended ?g ?gi ?gv))
+	     (not (reactivated ?g ?gi ?gv))
+	     (not (dropped ?g ?gi ?gv))
+	     (not (aborted ?g ?gi ?gv))
+	     (not (f ?g ?gi ?gv))
+	     (not (s ?g ?gi ?gv))))
+
+  (:- (activeG ?g ?gi ?gv) 
+        (and (considered ?g ?gi ?gv))
+	     (or (activated ?g ?gi ?gv) (reactivate ?g ?gi ?gv))
+	     (not (suspended ?g ?gi ?gv))
+	     (not (reconsidered ?g ?gi ?gv))
+	     (not (dropped ?g ?gi ?gv))
+	     (not (aborted ?g ?gi ?gv))
+	     (not (f ?g ?gi ?gv))
+	     (not (s ?g ?gi ?gv))))
+
+  (:- (suspendedG ?g ?gi ?gv) 
+        (and (considered ?g ?gi ?gv))
+	     (not (activated ?g ?gi ?gv))
+	     (suspended ?g ?gi ?gv)
+	     (not (reconsidered ?g ?gi ?gv))
+	     (not (reactivated ?g ?gi ?gv))
+	     (not (dropped ?g ?gi ?gv))
+	     (not (aborted ?g ?gi ?gv))
+	     (not (f ?g ?gi ?gv))
+	     (not (s ?g ?gi ?gv))))
+
+  (:- (terminatedG ?g ?gi ?gv) 
+        (and (considered ?g ?gi ?gv))
+	     (not (activated ?g ?gi ?gv))
+	     (not (suspended ?g ?gi ?gv))
+	     (not (reconsidered ?g ?gi ?gv))
+	     (not (reactivated ?g ?gi ?gv))
+	     (or (dropped ?g ?gi ?gv) (aborted ?g ?gi ?gv)))
+	     (not (f ?g ?gi ?gv))
+	     (not (s ?g ?gi ?gv))))
+
+  (:- (failedG ?g ?gi ?gv) 
+        (and (considered ?g ?gi ?gv))
+	     (f ?g ?gi ?gv)
+	     (not (s ?g ?gi ?gv)))
+
+  (:- (satisfiedG ?g ?gi ?gv) 
+        (and (considered ?g ?gi ?gv))
+	     (s ?g ?gi ?gv))
+
+
+
+
+
+;=============================================
+; Goal operators
+;=============================================
+
+  (:operator (!!testSuccessG ?g ?gi ?gv ?state)
+	(goal ?g ?gi ?a)
+	()
+	()
+	0
+  )
+
+  ; Regular transitions 
+  (:operator (!consider ?g ?gi ?a ?gv)
+    ((goal ?g ?gi ?a)(null ?g ?gi ?gv)(pg ?g ?gi ?gv))
+    ()
+    ((considered ?g ?gi ?gv))
+    1 
+  )
+
+  (:operator (!activate ?g ?gi ?a ?gv)
+    ((goal ?g ?gi ?a) (inactiveG ?g ?gi ?gv))
+    ()
+    ((activated ?g ?gi ?gv))
+    1
+  )
+
+  (:operator (!suspend ?g ?gi ?a ?gv)
+    ((goal ?g ?gi ?a)(inactiveG ?g ?gi ?gv)(activeG ?g ?gi ?gv))
+    ((activated ?g ?gi ?gv)(reconsidered ?g ?gi ?gv)
+     (reactivated ?g ?gi ?gv))
+    ((suspended ?g ?gi ?gv))
+    1 
+  )
+
+  (:operator (!reconsider ?g ?gi ?a ?gv)
+    ((goal ?g ?gi ?a)(suspendedG ?g ?gi ?gv))
+    ((suspended ?g ?gi ?gv))
+    ((reconsidered ?g ?gi ?gv))
+    1 
+  )
+
+  (:operator (!reactivate ?g ?gi ?a ?gv)
+    ((goal ?g ?gi ?a)(suspendedG ?g ?gi ?gv))
+    ((suspended ?g ?gi ?gv))
+    ((reactivated ?g ?gi ?gv))
+    1
+  )
+
+  (:operator (!drop ?g ?gi ?a ?gv)
+    ((goal ?g ?gi ?a)(inactiveG ?g ?gi ?gv)(activeG ?g ?gi ?gv)
+     (suspendedG ?g ?gi ?gv))
+    ((activated ?g ?gi ?gv)(reconsidered ?g ?gi ?gv)
+     (reactivated ?g ?gi ?gv)(suspended ?g ?gi ?gv))
+    ((dropped ?g ?gi ?gv))
+    1
+  )
+
+  (:operator (!abort ?g ?gi ?a ?gv)
+    ((goal ?g ?gi ?a)(inactiveG ?g ?gi ?gv)(activeG ?g ?gi ?gv)
+     (suspendedG ?g ?gi ?gv))
+    ((activated ?g ?gi ?gv)(reconsidered ?g ?gi ?gv)
+     (reactivated ?g ?gi ?gv)(suspended ?g ?gi ?gv))
+    ((aborted ?g ?gi ?gv))
+    1
+  )
+
+  ;================================
+  ; Methods to achieve agent goals
+  ;================================
+
+  (:method (achieveGoals)
+    workTowardsGoal
+    ((goal ?g ?gi ?a) (activeG ?g ?gi ?gv))
+    ((achieveGoal ?g ?gi ?a ?gv))
+  )
+
+  ; PT: Consider operator checks for goal's precondition.  In that case, why
+  ; do we need (goalPossible ..) in this method? 
+  (:method (achieveGoals)
+    activateGoal
+    ((goal ?g ?gi ?a) (goalPossible ?g ?gi ?gv))
+    ((!consider ?g ?gi ?a ?gv) (!activate ?g ?gi ?a ?gv) (achieveGoals))
+	
+    noGoalsPossible
+    ()
+    ()
+  )
+
+  (:method (achieveGoals)
+    multipleCommitments
+    ((goal ?g1 ?gi1 ?a1) (activeG ?g1 ?gi1 ?gv1) 
+     (goal ?g2 ?gi2 ?a2) (activeG ?g2 ?gi2 ?gv2) 
+     (commitment ?c1 ?ci1 ?a1 ?a2) (commitment ?c2 ?ci2 ?a2 ?a1) 
+     (eqGSCP ?g1 ?gv1 ?c1 ?cv1) (eqGSCP ?g2 ?gv2 ?c2 ?cv2))
+
+    ((entice ?g1 ?c1 ?a1 ?a2) (entice ?g2 ?c2 ?a2 ?a1) 
+     (detach ?c1 ?ci1 ?cv1) (detach ?c2 ?ci2 ?cv2))
+  )
+
+  (:method (achieveGoal ?g ?gi ?a ?gv) 
+    generic
+    ((activeG ?g ?gi ?gv) (goal ?g ?gi ?a) (commitment ?c ?ci ?a ?d) 
+     (eqGSCP ?g ?gv ?c ?cv) (goal ?g2 ?gi2 ?a) 
+     (eqGSCQ ?g2 ?gv2 ?c ?cv) (call != ?g ?g2))
+
+    ((entice ?g ?gi ?gv ?c ?ci ?cv ?a ?d) (detach ?c ?ci ?cv) 
+     (deliver ?g2 ?gi2 ?gv2 ?c ?ci ?cv ?a ?d) (achieveGoal ?g2 ?gi2 ?a ?gv2))
+  )
+
+  ;; Redo from here on before testing.
+  (:method (achieveGoal g2 ?gi (?t) c)
+      ((activeG g2 ?gi (?t)) (goal g2 ?gi c) )
+      ((!manufactureGoods c ?t))
+  )
+
+  (:method (achieveGoal g3 ?gi (?t) m)
+	((activeG g3 ?gi (?t)) (goal g3 ?gi m))
+	((!sendGoods m c ?t))
+  )
+
+  (:method (achieveGoal g4 ?gi (?t) c)
+	((activeG g4 ?gi (?t)) (goal g4 ?gi c))
+	((!sendPayment c m ?t))
+  )
+
+  (:method (detach ?c ?ci (?t))
+    ((call = ?c c1) (active ?c ?ci (?t)))
+	((!sendPayment c m ?t))
+	
+	((call = ?c c5) (active ?c ?ci (?t)))
+	((!sendGoods m c ?t))
+  )
+
+
+
+  ;==================================
+  ; Methods on goals and commitments
+  ; Practical Rules
+  ;=================================
+
+  ; PT: These methods need to relate  commitment's antecedent
+  ; and consequent with goals success condition.
+  ; If G = G(x, s, f), then C should be C(x, y, s, u) where u
+  ; can be any condition, but "s" need to be the same. 
+  ; I am not sure how to write it in this language.
+  ; PT: Above is addressed using eqGSCP axiom
+
+  (:method (entice ?g ?gi ?gv ?c ?ci ?cv ?d ?a)
+    ((goal ?g ?gi ?d) (activeG ?g ?gi ?gv) 
+     (commitment ?c ?ci ?d ?a) (null ?c ?ci ?cv)
+     (eqGSCP ?g ?gv ?c ?cv))
+
+    ((!create ?c ?ci ?d ?a ?cv))
+  )
+	
+ 
+  ; Suspends an offer from ?d to ?a
+  (:method (suspendOffer ?g ?gi ?gv ?c ?ci ?cv ?d ?a)
+     ((goal ?g ?gi ?d) (suspendedG ?g ?gi ?gv) 
+      (commitment ?c ?ci ?d ?a) (active ?c ?ci ?cv))
+
+     ((!suspend ?c ?ci ?d ?a ?cv))
+  )
+  
+ ; Revives a commitment when a goal becomes active
+  (:method (revive ?g ?gi ?gv ?c ?ci ?cv ?d ?a)
+    ((goal ?g ?gi ?d) (activeG ?g ?gi ?gv) 
+     (commitment ?c ?ci ?d ?a) (pending ?c ?ci ?cv))
+
+    ((!reactivate ?c ?ci ?d ?a ?cv))
+  )
+
+  ; Withdraws a commitment when a goal has failed or terminated
+  (:method (withdrawOffer ?g ?gi ?gv ?c ?ci ?cv ?d ?a)
+    ((goal ?g ?gi ?d) (or (failedG ?g ?gi ?gv) (terminatedG ?g ?gi ?gv)) 
+     (commitment ?c ?ci ?d ?a) (active ?c ?ci ?cv))
+
+    ((!cancel ?c ?ci ?d ?a ?cv))
+  )
+
+  ; Revives a commitment to withdraw it?	
+  (:method (reviveToWithdraw ?g ?gi ?gv ?c ?ci ?cv ?d ?a)
+    ((goal ?g ?gi ?d) (or (failedG ?g ?gi ?gv) (terminatedG ?g ?gi ?gv)) 
+     (commitment ?c ?ci ?d ?a) (pending ?c ?ci ?cv))
+
+    ((!reactivate ?c ?ci ?d ?a ?cv))
+  )
+	
+  ;Axiom Added for readbility 
+  (:- (negotiable ?g ?gi ?gv ?c ?ci ?cv) 
+      (and (or (activeG ?g ?gi ?gv) (suspendedG ?g ?gi ?gv)) 
+           (or (expired ?c ?ci ?cv) (terminated ?c ?ci ?cv))))
+	
+
+  (:method (negotiate ?g ?gi ?gv ?c1 ?ci1 ?cv1 ?c2 ?ci2 ?cv2 ?d ?a1 ?a2)
+    ;Replaced by this expression
+    ((goal ?g ?gi ?d) (commitment ?c1 ?ci1 ?d ?a2) 
+     (commitment ?c2 ?ci2 ?d ?a2) (null ?c2 ?ci2 ?cv2) 
+     (negotiable ?g ?gi ?gv ?c1 ?ci1 ?cv2))
+
+    ((!create ?c2 ?ci2 ?d ?a2 ?ci2))
+  )
+	
+  (:method (abandonEndGoal ?g ?gi ?gv ?c ?ci ?cv ?d ?a)
+    ; Combinations of (A v U) and (E v T): AE AT UE UT
+    ((goal ?g ?gi ?d) (or (activeG ?g ?gi ?gv) (suspendedG ?g ?gi ?gv)) 
+     (commitment ?c ?ci ?d ?a) 
+     (or (expired ?c ?ci ?cv) (terminated ?c ?ci ?cv)))
+
+    ((!drop ?g ?gi ?d ?gv))
+  )
+	
+  ;Deliver and Deliver' are encoded in a single method
+  (:method (deliver ?g ?gi ?gv ?c ?ci ?cv ?d ?a)
+    ; Deliver
+    ((goal ?g ?gi ?d) (null ?g ?gi ?gv) 
+     (commitment ?c ?ci ?d ?a) (detached ?c ?ci ?cv))
+    ((!consider ?g ?gi ?d ?gv) (!activate ?g ?gi ?d ?gv) )
+
+    ; Deliver'
+    ((goal ?g ?gi ?d) (inactiveG ?g ?gi ?gv) 
+     (commitment ?c ?ci ?d ?a) (detached ?c ?ci ?cv))
+    ((!activate ?g ?gi ?d ?gv))
+  )
+
+
+  (:method (backBurner ?g ?gi ?gv ?c ?ci ?cv ?d ?a)
+    ((goal ?g ?gi ?d) (activeG ?g ?gi ?gv) 
+     (commitment ?c ?ci ?d ?a) (pending ?c ?ci ?cv))
+    ((!suspend ?g ?gi ?d ?gv))
+  )
+	
+
+  (:method (frontBurner ?g ?gi ?gv ?c ?ci ?cv ?d ?a)
+    ((goal ?g ?gi ?d) (suspendedG ?g ?gi ?gv) 
+     (commitment ?c ?ci ?d ?a) (detached ?c ?ci ?cv))
+    ((!reactivate ?g ?gi ?d ?gv))
+  )
+	
+  (:method (abandonMeansGoal ?g ?gi ?gv ?c ?ci ?cv ?d ?a)
+    ((goal ?g ?gi ?d) (or (activeG ?g ?gi ?gv) (suspendedG ?g ?gi ?gv)) 
+     (commitment ?c ?ci ?d ?a) (or (expired ?c ?ci ?cv) (terminated ?c ?ci ?cv)) )
+    ((!drop ?g ?gi ?d ?gv))
+  )
+	
+  (:method (persist ?g ?gi ?gv ?c ?ci ?cv ?g2 ?gi2 ?gv2 ?d ?a)
+    ((goal ?g ?gi ?d) (or (terminatedG ?g ?gi ?gv) (failedG ?g ?gi ?gv)) 
+     (commitment ?c ?ci ?d ?a) (detached ?c ?ci ?cv) 
+     (goal ?g2 ?gi2 ?d) (null ?g2 ?gi2 ?gv2))
+    ((!consider ?g2 ?gi2 ?d ?gv2) (!activate ?g2 ?gi2 ?d ?gv2))
+  )
+	
+  (:method (giveUp ?g ?gi ?gv ?c ?ci ?cv ?d ?a)
+    ((goal ?g ?gi ?d) (or (terminatedG ?g ?gi ?gv) (failed ?g ?gi ?gv)) 
+    (commitment ?c ?ci ?d ?a) (detached ?c ?ci ?cv))
+    ((!cancel ?c ?ci ?d ?a ?cv))
+  )
+
+  ;=========================
+  ; Methods to test the rules
+  ;=========================
+  (:method (testCommitment ?c ?ci ?cv ?s)
+    ((commitment ?c ?ci ?d ?a) (call = ?s null) (null ?c ?ci ?cv))
+    ((!!testSuccess ?c ?ci ?cv ?s))
+
+    ((commitment ?c ?ci ?d ?a) (call = ?s conditional) (conditional ?c ?ci ?cv))
+    ((!!testSuccess ?c ?ci ?cv ?s))
+
+	((commitment ?c ?ci ?d ?a) (call = ?s active) (active ?c ?ci ?cv))
+    ((!!testSuccess ?c ?ci ?cv ?s))
+
+    ((commitment ?c ?ci ?d ?a) (call = ?s nactive) (not (active ?c ?ci ?cv)))
+    ((!!testSuccess ?c ?ci ?cv ?s))
+
+	((commitment ?c ?ci ?d ?a) (call = ?s detached) (detached ?c ?ci ?cv))
+    ((!!testSuccess ?c ?ci ?cv ?s))
+
+    ((commitment ?c ?ci ?d ?a) (call = ?s expired) (expired ?c ?ci ?cv))
+    ((!!testSuccess ?c ?ci ?cv ?s))
+
+    ((commitment ?c ?ci ?d ?a) (call = ?s pending) (pending ?c ?ci ?cv))
+    ((!!testSuccess ?c ?ci ?cv ?s))
+
+    ((commitment ?c ?ci ?d ?a) (call = ?s terminated) (terminated ?c ?ci ?cv))
+    ((!!testSuccess ?c ?ci ?cv ?s))
+
+    ((commitment ?c ?ci ?d ?a) (call = ?s violated) (violated ?c ?ci ?cv))
+    ((!!testSuccess ?c ?ci ?cv ?s))
+
+    ((commitment ?c ?ci ?d ?a) (call = ?s satisfied) (satisfied ?c ?ci ?cv))
+    ((!!testSuccess ?c ?ci ?cv ?s))
+
+    ((commitment ?c ?ci ?d ?a) (call = ?s cancelled) (cancelled ?c ?ci ?cv))
+    ((!!testSuccess ?c ?ci ?cv ?s))
+	
+    ((commitment ?c ?ci ?d ?a) (call = ?s terminal) (terminal ?c ?ci ?cv))
+    ((!!testSuccess ?c ?ci ?cv ?s))
+  )
+
+	(:method (testGoal ?g ?gi ?gv ?s)
+	    ((goal ?g ?gi ?a) (call = ?s null) (null ?g ?gi ?gv))
+	    ((!!testSuccessG ?g ?gi ?gv ?s))
+	
+	   	((goal ?g ?gi ?a) (call = ?s inactive) (inactiveG ?g ?gi ?gv))
+	    ((!!testSuccessG ?g ?gi ?gv ?s))
+	
+	    ((goal ?g ?gi ?a) (call = ?s ninactive) (not (inactiveG ?g ?gi ?gv)))
+	    ((!!testSuccessG ?g ?gi ?gv ?s))
+	
+	   	((goal ?g ?gi ?a) (call = ?s active) (activeG ?g ?gi ?gv))
+	    ((!!testSuccessG ?g ?gi ?gv ?s))
+	
+	   	((goal ?g ?gi ?a) (call = ?s nactive) (not (activeG ?g ?gi ?gv)))
+	    ((!!testSuccessG ?g ?gi ?gv ?s))
+	
+	    ((goal ?g ?gi ?a) (call = ?s suspended) (suspendedG ?g ?gi ?gv))
+	    ((!!testSuccessG ?g ?gi ?gv ?s))
+	
+	    ((goal ?g ?gi ?a) (call = ?s nsuspended) (not (suspendedG ?g ?gi ?gv)))
+	    ((!!testSuccessG ?g ?gi ?gv ?s))
+	
+	   	((goal ?g ?gi ?a) (call = ?s terminated) (terminatedG ?g ?gi ?gv))
+	    ((!!testSuccessG ?g ?gi ?gv ?s))
+	
+	   	((goal ?g ?gi ?a) (call = ?s failed) (failed ?g ?gi ?gv))
+	    ((!!testSuccessG ?g ?gi ?gv ?s))
+	   
+	   	((goal ?g ?gi ?a) (call = ?s satisfied) (satisfiedG ?g ?gi ?gv))
+	    ((!!testSuccessG ?g ?gi ?gv ?s))
+	
+	   	((goal ?g ?gi ?a) (call = ?s nsatisfied) (not (satisfiedG ?g ?gi ?gv)))
+	    ((!!testSuccessG ?g ?gi ?gv ?s))
+		
+	   	((goal ?g ?gi ?a) (call = ?s terminal) (terminalG ?g ?gi ?gv))
+	    ((!!testSuccessG ?g ?gi ?gv ?s))
+	)
+	
+	(:method (testGoalCommitmentRule ?rule ?g ?gi ?a ?c ?ci ?de ?cr)
+		((goal ?g ?gi ?a) (commitment ?c ?ci ?de ?cr) (call = ?rule eqGSCP) (eqGSCP ?g ?gv ?c ?cv))
+		((!!testRuleSuccess ?rule (?g ?gi ?gv ?c ?ci ?cv) ))
+	)
+	
+   ; (:method (testCondition ?c) 
+   ; 	
+   ; 	)	
+ )
+
+)

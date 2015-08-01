@@ -1,0 +1,170 @@
+(defproblem pbpatterns cgfopatterns
+
+
+;=== Arithmetic ====  
+;   ;Preconds	
+;   (
+;     (agent Buyer)
+;     (agent Seller1)
+;     (agent Seller2)
+
+;     ; c7 and c8 are two instances of commitment type C7
+;     (commitment c7 C7 Seller1 Buyer)
+;     (commitment c8 C7 Seller2 Buyer)
+;   )
+  
+;   ;Initial HTN
+;   (
+;     (!create c7 C7 Seller1 Buyer (100 289))
+;     (!create c8 C7 Seller2 Buyer (150 511))
+	  
+;     (selectCommitment c7 (100 289) c8 (150 511))
+;   )
+
+
+;====================================================
+
+
+;=== Delegation =====
+    ;preconds
+;     ((agent x)
+;      (agent y)
+;      (agent z)
+;      (agent w)
+     
+;      (commitment c1 C8 x y)
+;      (commitment c2 C8 z y)
+;      (commitment c3 C8 w y)
+;     )
+
+;     ;initial HTN
+;     (
+;       (!create c1 C8 x y ())
+;       (delegate c1 c2 C8 () z)
+;       (!pay y z)
+;       (!cancel c2 C8 z y ())
+;       (revive c1 C8 ())	
+;       (delegate c1 c3 C8 () w)
+;       (!goods w y)
+;     )
+;=============================================
+
+; ;===piecemeal progress =====
+
+;   ;Preconds	
+;   (
+;     (agent Buyer)
+;     (agent Seller)
+
+;     ; c9 is an instance of commitment type C9
+;     (commitment c9 C9 Buyer Seller)
+;   )
+  
+;   ;Initial HTN
+;   (
+;     (!create c9 C9 Buyer Seller (100 289)); Amount=$100, TxID=289
+;     (!goods Seller Buyer 289)
+;     (checkDetached c9 (100 289))
+
+;     (makePayment Buyer Seller 40 289)
+;     (makePayment Buyer Seller 20 289)
+;     (makePayment Buyer Seller 40 289)
+;     (checkSatisfied c9 (100 289))
+;   )
+
+;=============================================
+
+
+;===concession =====
+
+;   ;Preconds	
+;   (
+;     (agent Buyer)
+;     (agent Seller)
+
+;     ; c9 is an instance of commitment type C9
+;     (commitment c9 C9 Buyer Seller)
+;   )
+  
+;   ;Initial HTN
+;   (
+;     (!create c9 C9 Buyer Seller (100 289)); Amount=$100, TxID=289
+;     (makePayment Buyer Seller 40 289); Advance payment
+
+;     (!goods Seller Buyer 289)
+;     (checkDetached c9 (100 289))
+
+;     (makePayment Buyer Seller 20 289)
+;     (makePayment Buyer Seller 40 289)
+;     (makePayment Buyer Seller 50 289)
+
+;     (checkSatisfied c9 (100 289))
+;   )
+
+;=============================================
+
+
+; ;===consolidation =====
+
+;   ;Preconds	
+;   (
+;     (agent Buyer)
+;     (agent Seller)
+
+;     ; c9 is an instance of commitment type C9
+;     (commitment c9 C9 Buyer Seller)
+;     (commitment c10 C9 Buyer Seller)
+;   )
+  
+;   ;Initial HTN
+;   (
+;     (!create c9 C9 Buyer Seller (100 289)); Amount=$100, TxID=289
+;     (!create c10 C9 Buyer Seller (150 295)); Amount=$150, TxID=295
+
+
+;     (shiptogether Seller Buyer 289 295)
+;     (checkDetached c9 (100 289))
+;     (checkDetached c10 (150 295))    
+
+;     (paytogether Buyer Seller 100 289 295)
+;     (paytogether Buyer Seller 100 289 295)
+;     (paytogether Buyer Seller 100 289 295)
+;     (checkSatisfied c9 (100 289))
+;     (checkSatisfied c10 (150 295))
+
+;   )
+
+;=============================================
+
+; ;===compensation =====
+
+  ;Preconds	
+  (
+    (agent Buyer)
+    (agent Seller)
+
+    ; c9 is an instance of commitment type C9
+    (commitment c11 C9 Buyer Seller)
+  )
+  
+  ;Initial HTN
+  (
+    (!create c11 C9 Buyer Seller (150 295)); Amount=$150, TxID=295
+    (!goods Seller Buyer 295)
+    (checkDetached c11 (150 295))    
+
+    (makePayment Buyer Seller 100 295)
+    (checkSatisfied c11 (150 295))
+
+    (!returnGoods Buyer Seller 295)
+    (refundOnReturn Seller Buyer 295)
+  )
+
+;=============================================
+
+
+
+
+
+)
+

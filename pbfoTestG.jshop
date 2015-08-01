@@ -1,0 +1,28 @@
+(defproblem pbfotestg cgfo
+		(
+		 (goal g1 G1 m)
+	 
+		(agent m)
+		(agent c)
+    
+		 ) ;Preconds
+	
+		(
+		 (testGoal g1 G1 (t1) null)
+		 (!consider g1 G1 m (t1)) (testGoal g1 G1 (t1) inactive) 
+			              (testGoal g1 G1 (t1) nactive) 
+						  (testGoal g1 G1 (t1) nsuspended)
+		 (!activate g1 G1 m (t1)) (testGoal g1 G1 (t1) active) 
+			              (testGoal g1 G1 (t1) ninactive) 
+						  (testGoal g1 G1 (t1) nsuspended)
+		 (!suspend g1 G1 m (t1)) (testGoal g1 G1 (t1) suspended) 
+			             (testGoal g1 G1 (t1) nactive) 
+						 (testGoal g1 G1 (t1) ninactive)
+		 (!reactivate g1 G1 m (t1)) (testGoal g1 G1 (t1) active) 
+			                (testGoal g1 G1 (t1) ninactive) 
+							(testGoal g1 G1 (t1) nsuspended)
+		 (!sendPayment c m t1) (testGoal g1 G1 (t1) satisfied) 
+			                (testGoal g1 G1 (t1) nactive) 
+							(testGoal g1 G1 (t1) ninactive)
+		) ;initial HTN
+)
