@@ -14,5 +14,5 @@ else
 		java run $2
 	fi
 	rm *.class
-	rm ${1}.java ${2}.java
+	rm ${1}.java ${2}.java ${1}.txt
 fi
