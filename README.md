@@ -1,4 +1,4 @@
-# HTN-GoCO
+# HTN-GoCo
 
 Repository for the code used in the goals and commitments planning framework developed by Meneguzzi, Telang and others. The following papers discuss this in more theoretical detail:
 - MENEGUZZI, Felipe; TELANG, Pankaj and SINGH, Munindar P. [A First-Order Formalization of Commitments and Goals](http://www.aaai.org/ocs/index.php/AAAI/AAAI13/paper/view/6371/7241), In Proceedings of the 27th AAAI Conference on Artificial Intelligence (AAAI), Bellevue, WA, USA, 2013. 
@@ -10,7 +10,9 @@ First ensure that JSHOP is in the CLASSPATH (both antlr.jar and JSHOP2.jar must 
 Then run compile.sh using as parameters the name of the domain (without .jshop) and the name of the problem (also without .shop), with either run or gui as the third parameter.
 For example, to compile and run a domain stored in cg.jshop with a problem stored in pb1.jshop, the command would be:
 
+```bash
 ./compile.sh gb pb1 run
+```
 
 ## Installing JSHOP2
 [JSHOP2](https://sourceforge.net/projects/shop/files/JSHOP2/) lives in Sourceforge, but it seems to have been abandoned. If you really like Github, some people mirrored it at [https://github.com/mas-group/jshop2](https://github.com/mas-group/jshop2)
