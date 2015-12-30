@@ -1,5 +1,0 @@
-First ensure that JSHOP is in the CLASSPATH (both antlr.jar and JSHOP2.jar must be in the CLASSPATH)
-Then run compile.sh using as parameters the name of the domain (without .jshop) and the name of the problem (also without .shop), with either run or gui as the third parameter.
-For example, to compile and run a domain stored in cg.jshop with a problem stored in pb1.jshop, the command would be:
-
-./compile.sh gb pb1 run
