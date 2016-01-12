@@ -1,0 +1,22 @@
+(defproblem pbhealth cgfohealth
+	(
+		(patient alice)
+		(physician bob)
+		(radiologist clyde)
+		(pathologist doug)
+		(registrar evelyn)
+		(hospital simhospital)
+		
+		(hasCancer alice)
+	) ; Initial State
+	(
+		(!requestVisit clyde alice)
+		(!performImaging clyde alice)
+		(!sendImagingResults alice clyde bob)
+		(!performDiagnosis clyde doug alice)
+		(!sendIntegratedReport clyde doug alice bob)
+		(!generateTreatmentPlan bob alice)
+		(!reportPatient alice doug evelyn)
+		(!addPatientToRegistry alice evelyn)
+	) ;tn
+)
