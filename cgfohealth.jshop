@@ -23,6 +23,12 @@
 	; = Commitments =
 	; ===============
 	
+	; XXX Organizational context is ommitted here
+	; C1: C(Physician,Patient, diagnosisRequested & -vio(C2) & -vio(C3), diagnosisProvided)
+    (:- (p ?c C1 (?t)) (and (commitment ?c ?ci ?physician ?patient) (var ?c ?ci (?t)) (paid ?a ?t)) ) 
+    (:- (q ?c C1 (?t)) (and (commitment ?c ?ci ?physician ?patient) (var ?c ?ci (?t)) (goods ?a ?t)) )
+	
+	
 	; << Commitments Placeholder >>
 	
 	; ==================
@@ -47,28 +53,45 @@
 	; ====================
 	; = Domain Operators =
 	; ====================
-	
+
+
+	;; PT: Physician requests patient to go to radiologist. Therefore, physician needs to 
+	;; be a parameter in this operator.
+
+	;; PT: We need two operators: requestImaging and requestBiopsy. Or, one requestVisit operator
+	;; with additional requestType (imaging or biopsy) parameter.
+		
+	;; FM: Humm, but the paper does not 
+
 	(:operator (!requestVisit ?radiologist ?patient)
 		(and (patient ?patient) (radiologist ?radiologist)) ;Pre
 		() ;Del
 		((appointment ?patient ?radiologist)) ;Add
 		1	; Cost
 	)
-	
+
+
+	;; PT: performImaging and sendImagingResults can be combined. 
+
 	(:operator (!performImaging ?radiologist ?patient)
 		(and (patient ?patient) (radiologist ?radiologist)) ; Pre
 		((appointment ?patient ?radiologist)) ; Del
 		((imagingScan ?patient ?radiologist)) ; Add
 		1 ; Cost
 	)
-	
+
 	(:operator (!sendImagingResults ?patient ?radiologist ?physician)
 		(and (imagingScan ?patient ?radiologist) (physician ?physician)) ; Pre
 		((imagingScan ?patient ?radiologist)) ; Del
 		((imagingScan ?patient ?physician)) ; Add
 		1 ; Cost
 	)
-	
+
+
+	;; Instead of performDiagnosis, we need:
+	;; (A) requestPathologyReport operator; radiologist requests a pathologist for pathology report
+	;; (B) requestRadiologyReport operator; pathologist requests a radiologist for radiology report
+		
 	(:operator (!performDiagnosis ?radiologist ?pathologist ?patient)
 		(and (radiologist ?radiologist) (pathologist ?pathologist) (patient ?patient)) ; Pre
 		() ; Del
@@ -82,7 +105,7 @@
 		((integratedReport ?patient ?physician)) ; Add
 		1 ; Cost
 	)
-	
+
 	(:operator (!generateTreatmentPlan ?physician ?patient)
 		(and (patient ?patient) (physician ?physician) (imagingScan ?patient ?physician) (integratedReport ?patient ?physician)) ; Pre
 		() ; Del
@@ -113,6 +136,19 @@
 	)
 	
 	;; TODO Ask Pankaj about how this works
+
+	;; Patient, Physician, Radiologist, or Pathologist can request Tumor Board (TB) for assessment of a 
+	;; report sent to them by a counter party.  
+	;; (A) Patient can request TB to assess Physician's report; TB either agrees or disagrees 
+	;; with Physician's report.  
+	;; (B) Physician can request TB to assess the "integratedReport" sent by Radiologist; TB either agrees
+	;; or disagrees with Radiologist's report.
+	;; (C) Pathologist can request TB to assess Radiologist's report; TB either agrees or disagress
+	;;  with Radiologist's report.
+	;; (D) Radiologist can request TB to assess Pathologist's report; TB either agrees or disagress
+	;; with Pathologist's report.
+
+
 	(:operator (!requestTumorBoardInput ?person ?hospital)
 		(and (hospital ?hospital) (or (patient ?person) (radiologist ?person) (physician ?person) (pathologist ?person)) ) ; Pre
 		() ; Del

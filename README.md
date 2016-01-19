@@ -20,3 +20,6 @@ For example, to compile and run a domain stored in cg.jshop with a problem store
 ## Tasks
 - [ ] Write a software to generate the domains automatically from goals and commitments
 - [ ] Implement new domain
+	- [x] Formalise operators from the healthcare scenario
+	- [x] Formalise commitments from the healthcare scenario
+- [ ] Implement domain generator
