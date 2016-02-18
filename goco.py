@@ -9,6 +9,7 @@
 import re
 from optparse import OptionParser
 from __builtin__ import str
+import logging as log
 
 class Commitment:
     def __init__(self,(cid,debtor,creditor,antecedent,consequent)):
@@ -205,8 +206,19 @@ if __name__ == '__main__':
                       help="don't print status messages to stdout")
     
     (options, args) = parser.parse_args()
-    print options
-    print args
+    
+    if(options.quiet):
+        log.info("Suppressing most output")
+        log.basicConfig(format="%(levelname)s: %(message)s", level=log.CRITICAL)
+    elif(options.verbose):
+        log.info("Verbose output."):
+        log.basicConfig(format="%(levelname)s: %(message)s", level=log.INFO)
+    else(not options.quiet):
+        log.basicConfig(format="%(levelname)s: %(message)s", level=log.WARNING)
+    
+    if(len(args)==0):
+        log.critical("Must supply a filename with goals and commitments")
+    
     
     goco = GoCo()
     #goco.parse_file(args[0])
