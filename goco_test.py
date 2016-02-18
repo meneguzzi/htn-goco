@@ -20,5 +20,16 @@ class GoCoTest(unittest.TestCase):
         print lisp_expr
         self.assertEquals("(and diagnosisRequested (not (vio ?C2)) (not (vio ?C3)))", lisp_expr)
         
+    def test_generate_commitment_rules(self):
+        commitment1 = "C1(PHYSICIAN, PATIENT, diagnosisRequested ^ -vio(C2) ^ -vio(C3), diagnosisProvided)"
+        self.goco.parse_commitments(commitment1)
+        rules = self.goco.generate_commitment_rules()
+        self.assertTrue(rules.find("(p ?c C1 (?t))")>0)
+    
+    def test_generate_jshop_domain(self):
+        commitment1 = "C1(PHYSICIAN, PATIENT, diagnosisRequested ^ -vio(C2) ^ -vio(C3), diagnosisProvided)"
+        self.goco.generate_jshop_domain()
+        
+        
 if __name__ == '__main__':
     unittest.main()

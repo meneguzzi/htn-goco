@@ -1,0 +1,15 @@
+(defdomain %s 
+ (
+ 	; Generic Axioms
+ 	%s
+ 	
+ 	; Domain specific axioms
+ 	%s
+ 	
+ 	; Generic operators
+ 	%s
+ 	
+ 	; Domain dependent operators
+ 	%s 
+ )
+)

@@ -54,6 +54,12 @@ class Goal:
         return comment+"\n"+precond+"\n"+success+"\n"+failure+"\n"
 
 class GoCo:
+    
+    #TODO use a settings file to configure this
+    generic_axioms_file = "axioms.jshop"
+    generic_operators_file = "operators.jshop"
+    domain_template_file = "domain-template.jshop"
+     
     def __init__(self):
         self.commitments = dict()
         self.goals = dict()
@@ -64,6 +70,43 @@ class GoCo:
         # print text
         self.parse_commitments(text)
         self.parse_goals(text)
+    
+    def read_text_file(self,filename):
+        f = open(filename, 'r')
+        text = f.read()#FIXME Deal with reading very large files
+        return text
+    
+    def generate_jshop_domain(self,input_file=None,operators_file=None):
+        """ Generates the JSHOP source code for a GoCo domain"""
+        domain_name = "goco"
+        domain_operators = ""
+        output_file=None
+        if(input_file is not None):
+            #assert(isinstance(input_file, string))
+            assert(input_file.find(".goco") > 0)
+            domain_name = input_file[:input_file.find(".goco")]
+            self.parse_file(input_file)
+            assert(len(self.commitments)+len(self.goals) > 0)
+            output_file = domain_name+".jshop"
+        
+        if(operators_file is not None):
+            domain_operators = self.read_text_file(operators_file)
+        
+        domain_source = self.read_text_file(self.domain_template_file)
+        axioms_source = self.read_text_file(self.generic_axioms_file)
+        operators_source = self.read_text_file(self.generic_operators_file)
+        
+        domain_axioms = self.generate_commitment_rules()+self.generate_goal_rules()
+        
+        output = domain_source % (domain_name,axioms_source,domain_axioms,operators_source,domain_operators)
+        if(output_file == None):
+            print "Outputting to std out"
+            print output
+        else:
+            print "Writing domain to %s " % output_file
+            f = open(output_file, 'w')
+            f.write(output)
+            f.close()
         
     
     def parse_commitments(self,text):
@@ -92,22 +135,29 @@ class GoCo:
         r = ""
         for cid in self.commitments:
             r+=self.commitments[cid].gen_lisp()+"\n"
+            
         return r
     
     def generate_goal_rules(self):
-        pass
+        r = ""
+        
+        for gid in self.goals:
+            r+=self.goals[gid].gen_lisp()+"\n"
+            
+        return r
 
 def parse_expresion(expr, root=None):
     """Parses an expression in the GoCo grammar -- Right now, VERY limited TODO create a decent parser for this"""
     if(expr==""): return None
     
     tokens = re.findall("\s*(-?\w+(\([\w+,?]*\))?|(\s*\^))",expr)
-    print "Tokens: ",tokens
+    #print "Tokens: ",tokens
     
     return tokens
 
 def lispify(expr):
-    """ Transforms an expression into a LISP-like expression""" # TODO Implement this
+    """ Transforms an expression into a LISP-like expression"""
+    # TODO Implement this properly, as this is pretty hacky right now
     tokens = parse_expresion(expr)
     
     lisp_expr = "("
@@ -146,6 +196,8 @@ def lispify(expr):
 
 if __name__ == '__main__':
     parser = OptionParser()
+    parser.add_option("-p", "--operators", dest="operators", action="store", type="string",
+                      help="read domain specific operators from FILE", metavar="FILE")
     parser.add_option("-d", "--dir-output", dest="output", action="store", type="string",
                       help="write reports to DIR", metavar="DIR")
     parser.add_option("-q", "--quiet",
@@ -157,7 +209,8 @@ if __name__ == '__main__':
     print args
     
     goco = GoCo()
-    # goco.parse_file(args[0])
-    goco.parse_file('healthcare.goco')
-    print goco.generate_commitment_rules()
+    #goco.parse_file(args[0])
+    #goco.parse_file('healthcare.goco')
+    # print goco.generate_commitment_rules()
+    goco.generate_jshop_domain(args[0],options.operators)
     
