@@ -202,7 +202,10 @@ if __name__ == '__main__':
     parser.add_option("-d", "--dir-output", dest="output", action="store", type="string",
                       help="write reports to DIR", metavar="DIR")
     parser.add_option("-q", "--quiet",
-                      action="store_false", dest="verbose", default=True,
+                      action="store_true", dest="quiet", default=False,
+                      help="don't print status messages to stdout")
+    parser.add_option("-v", "--verbose",
+                      action="store_true", dest="verbose", default=False,
                       help="don't print status messages to stdout")
     
     (options, args) = parser.parse_args()
