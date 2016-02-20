@@ -211,9 +211,9 @@ if __name__ == '__main__':
         log.info("Suppressing most output")
         log.basicConfig(format="%(levelname)s: %(message)s", level=log.CRITICAL)
     elif(options.verbose):
-        log.info("Verbose output."):
+        log.info("Verbose output.")
         log.basicConfig(format="%(levelname)s: %(message)s", level=log.INFO)
-    else(not options.quiet):
+    else:
         log.basicConfig(format="%(levelname)s: %(message)s", level=log.WARNING)
     
     if(len(args)==0):
