@@ -11,6 +11,8 @@ from optparse import OptionParser
 from __builtin__ import str
 import logging as log
 
+from subprocess import call
+
 class Commitment:
     def __init__(self,(cid,debtor,creditor,antecedent,consequent)):
         self.cid = cid
@@ -60,6 +62,7 @@ class GoCo:
     generic_axioms_file = "axioms.jshop"
     generic_operators_file = "operators.jshop"
     domain_template_file = "domain-template.jshop"
+    problem_template_file = "problem-template.jshop"
      
     def __init__(self):
         self.commitments = dict()
@@ -77,11 +80,12 @@ class GoCo:
         text = f.read()#FIXME Deal with reading very large files
         return text
     
-    def generate_jshop_domain(self,input_file=None,operators_file=None):
+    def generate_jshop_code(self,input_file=None,operators_file=None):
         """ Generates the JSHOP source code for a GoCo domain"""
         domain_name = "goco"
         domain_operators = ""
         output_file=None
+        problem_output_file=None
         if(input_file is not None):
             #assert(isinstance(input_file, string))
             assert(input_file.find(".goco") > 0)
@@ -89,24 +93,36 @@ class GoCo:
             self.parse_file(input_file)
             assert(len(self.commitments)+len(self.goals) > 0)
             output_file = domain_name+".jshop"
+            problem_output_file = "pb"+output_file
         
         if(operators_file is not None):
             domain_operators = self.read_text_file(operators_file)
         
         domain_source = self.read_text_file(self.domain_template_file)
+        problem_source = self.read_text_file(self.problem_template_file)
         axioms_source = self.read_text_file(self.generic_axioms_file)
         operators_source = self.read_text_file(self.generic_operators_file)
         
         domain_axioms = self.generate_commitment_rules()+self.generate_goal_rules()
         
-        output = domain_source % (domain_name,axioms_source,domain_axioms,operators_source,domain_operators)
+        initial_state = "(state)" # TODO complete this
+        task_network = "(!task a b)" # TODO complete this
+        
+        
+        domain_output = domain_source % (domain_name,axioms_source,domain_axioms,operators_source,domain_operators)
+        problem_output = problem_source % ("pb"+domain_name,domain_name,initial_state,task_network)
         if(output_file == None):
             print "Outputting to std out"
-            print output
+            print domain_output
+            print problem_output
         else:
             print "Writing domain to %s " % output_file
             f = open(output_file, 'w')
-            f.write(output)
+            f.write(domain_output)
+            f.close()
+            print "Writing problem to %s " % problem_output_file
+            f = open(problem_output_file, 'w')
+            f.write(problem_output)
             f.close()
         
     
@@ -221,11 +237,14 @@ if __name__ == '__main__':
     
     if(len(args)==0):
         log.critical("Must supply a filename with goals and commitments")
+        exit(1)
     
+    input_file = args[0]
     
     goco = GoCo()
     #goco.parse_file(args[0])
     #goco.parse_file('healthcare.goco')
     # print goco.generate_commitment_rules()
-    goco.generate_jshop_domain(args[0],options.operators)
-    
+    goco.generate_jshop_code(input_file,options.operators)
+    domain_name = input_file[:input_file.find(".goco")]
+    call(['compile.sh', domain_name, 'pb'+domain_name ,'nogui', '1'])

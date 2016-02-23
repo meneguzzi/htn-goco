@@ -1,0 +1,8 @@
+(defproblem %s %s
+	(
+		%s
+	) ; Initial State
+	(
+		%s
+	) ;tn
+)
