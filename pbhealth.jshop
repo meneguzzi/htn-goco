@@ -10,13 +10,16 @@
 		(hasCancer alice)
 	) ; Initial State
 	(
-		(!requestVisit clyde alice)
-		(!performImaging clyde alice)
-		(!sendImagingResults alice clyde bob)
-		(!performDiagnosis clyde doug alice)
+		(!requestImaging bob alice clyde)
+		(!requestBiopsy bob alice doug)
+		(!performImaging clyde alice bob)
+		(!performBiopsy doug alice bob)
+		(!requestRadiologyReport bob clyde alice)
+		(!requestPathologyReport bob doug alice)
 		(!sendIntegratedReport clyde doug alice bob)
 		(!generateTreatmentPlan bob alice)
 		(!reportPatient alice doug evelyn)
 		(!addPatientToRegistry alice evelyn)
+		(!requestPhysicianReportAssessment alice bob simhospital)
 	) ;tn
 )

@@ -1,42 +1,57 @@
-(:operator (!requestVisit ?radiologist ?patient)
-		(and (patient ?patient) (radiologist ?radiologist)) ;Pre
+	(:operator (!requestImaging ?physician ?patient ?radiologist)
+		(and (physician ?physician) (patient ?patient) (radiologist ?radiologist)) ;Pre
 		() ;Del
 		((appointment ?patient ?radiologist)) ;Add
+		1	; Cost
+	)
+	
+	(:operator (!requestBiopsy ?physician ?patient ?pathologist)
+		(and (physician ?physician) (patient ?patient) (pathologist ?pathologist)) ;Pre
+		() ;Del
+		((appointment ?patient ?pathologist)) ;Add
 		1	; Cost
 	)
 
 
 	;; PT: performImaging and sendImagingResults can be combined. 
 
-	(:operator (!performImaging ?radiologist ?patient)
-		(and (patient ?patient) (radiologist ?radiologist)) ; Pre
+	(:operator (!performImaging ?radiologist ?patient ?physician)
+		(and (patient ?patient) (radiologist ?radiologist) (physician ?physician)) ; Pre
 		((appointment ?patient ?radiologist)) ; Del
-		((imagingScan ?patient ?radiologist)) ; Add
-		1 ; Cost
-	)
-
-	(:operator (!sendImagingResults ?patient ?radiologist ?physician)
-		(and (imagingScan ?patient ?radiologist) (physician ?physician)) ; Pre
-		((imagingScan ?patient ?radiologist)) ; Del
 		((imagingScan ?patient ?physician)) ; Add
 		1 ; Cost
 	)
 
+	(:operator (!performBiopsy ?pathologist ?patient ?physician)
+		(and (patient ?patient) (pathologist ?pathologist) (physician ?physician)) ; Pre
+		((appointment ?patient ?pathologist)) ; Del
+		((biopsyReport ?patient ?physician)) ; Add
+		1 ; Cost
+	)
 
 	;; Instead of performDiagnosis, we need:
 	;; (A) requestPathologyReport operator; radiologist requests a pathologist for pathology report
 	;; (B) requestRadiologyReport operator; pathologist requests a radiologist for radiology report
 		
-	(:operator (!performDiagnosis ?radiologist ?pathologist ?patient)
-		(and (radiologist ?radiologist) (pathologist ?pathologist) (patient ?patient)) ; Pre
+	(:operator (!requestPathologyReport ?physician ?pathologist ?patient)
+		(and (physician ?physician) (pathologist ?pathologist) (patient ?patient) (biopsyReport ?patient ?physician)) ; Pre
 		() ; Del
-		((integratedReport ?patient ?radiologist)) ; Add
+		((pathologyReport ?patient ?pathologist)) ; Add
+		1 ; Cost
+	)
+	
+	(:operator (!requestRadiologyReport ?physician ?radiologist ?patient)
+		(and (physician ?physician) (radiologist ?radiologist) (patient ?patient) (imagingScan ?patient ?physician)) ; Pre
+		() ; Del
+		((radiologyReport ?patient ?radiologist)) ; Add
 		1 ; Cost
 	)
 	
 	(:operator (!sendIntegratedReport ?radiologist ?pathologist ?patient ?physician)
-		(and (integratedReport ?patient ?radiologist) (radiologist ?radiologist) (physician ?physician)) ; Pre
-		((integratedReport ?patient ?radiologist)) ; Del
+		(and (pathologyReport ?patient ?pathologist) (radiologyReport ?patient ?radiologist)
+			(radiologist ?radiologist) (physician ?physician)
+			(patient ?patient) (pathologist ?pathologist)) ; Pre
+		((pathologyReport ?patient ?pathologist) (radiologyReport ?patient ?radiologist)) ; Del
 		((integratedReport ?patient ?physician)) ; Add
 		1 ; Cost
 	)
@@ -76,24 +91,58 @@
 	;; report sent to them by a counter party.  
 	;; (A) Patient can request TB to assess Physician's report; TB either agrees or disagrees 
 	;; with Physician's report.  
+	;; FIXME FRM - Pankaj, so far, I had not seen a "physician's" report, I'm assuming this is the treatment plan
 	;; (B) Physician can request TB to assess the "integratedReport" sent by Radiologist; TB either agrees
 	;; or disagrees with Radiologist's report.
+	;; FIXME FRM - Pankaj, I'm not sure I understand that the integrated report is created by the radiologist
 	;; (C) Pathologist can request TB to assess Radiologist's report; TB either agrees or disagress
 	;;  with Radiologist's report.
+	;; 
 	;; (D) Radiologist can request TB to assess Pathologist's report; TB either agrees or disagress
 	;; with Pathologist's report.
 
 
-	(:operator (!requestTumorBoardInput ?person ?hospital)
-		(and (hospital ?hospital) (or (patient ?person) (radiologist ?person) (physician ?person) (pathologist ?person)) ) ; Pre
+	; (:operator (!requestTumorBoardInput ?person ?patient ?physician ?hospital)
+; 		(and (hospital ?hospital)
+; 			(patient ?patient) (physician ?physician)
+; 			(or (patient ?person) (radiologist ?person) (physician ?person) (pathologist ?person))
+; 			(integratedReport ?patient ?physician)
+; 			) ; Pre
+; 		() ; Del
+; 		() ; Add
+; 		1 ; Cost
+; 	)
+	
+	; Patient requests assessment of physician report 
+	(:operator (!requestPhysicianReportAssessment ?patient ?physician ?hospital)
+		(and (hospital ?hospital) 
+			(patient ?patient) (physician ?physician) 
+			(integratedReport ?patient ?physician)
+			) ; Pre
 		() ; Del
-		() ; Add
+		((reportNeedsReview ?patient ?physician)) ; Add # Option 1, TB disagrees
+			; () ; Add # Option 2, TB agrees with physician (nothing happens)
 		1 ; Cost
 	)
-
-	(:operator (!name ?par)
-		() ; Pre
+	
+	(:operator (!requestRadiologyReportAssessment ?pathologist ?radiologist ?patient ?hospital)
+		(and (hospital ?hospital) 
+			(patient ?patient) (pathologist ?pathologist) (radiologist ?radiologist) 
+			(radiologyReport ?patient ?radiologist)
+			) ; Pre
 		() ; Del
-		() ; Add
+		((reportNeedsReview ?patient ?radiologist)) ; Add # Option 1, TB disagrees
+			; () ; Add # Option 2, TB agrees with radiologist (nothing happens)
+		1 ; Cost
+	)
+	
+	(:operator (!requestPathologyReportAssessment ?radiologist ?pathologist ?patient ?hospital)
+		(and (hospital ?hospital) 
+			(patient ?patient) (pathologist ?pathologist) (radiologist ?radiologist) 
+			(pathologyReport ?patient ?pathologist)
+			) ; Pre
+		() ; Del
+		((reportNeedsReview ?patient ?pathologist)) ; Add # Option 1, TB disagrees
+			; () ; Add # Option 2, TB agrees with pathologist (nothing happens)
 		1 ; Cost
 	)

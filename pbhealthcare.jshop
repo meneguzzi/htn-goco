@@ -1,0 +1,25 @@
+(defproblem pbhealthcare healthcare
+	(
+		(patient alice)
+(physician bob)
+(radiologist clyde)
+(pathologist doug)
+(registrar evelyn)
+(hospital simhospital)
+
+	) ; Initial State
+	(
+		(!requestImaging bob alice clyde)
+(!requestBiopsy bob alice doug)
+(!performImaging clyde alice bob)
+(!performBiopsy doug alice bob)
+(!requestRadiologyReport bob clyde alice)
+(!requestPathologyReport bob doug alice)
+(!sendIntegratedReport clyde doug alice bob)
+(!generateTreatmentPlan bob alice)
+(!reportPatient alice doug evelyn)
+(!addPatientToRegistry alice evelyn)
+(!requestPhysicianReportAssessment alice bob simhospital)
+
+	) ;tn
+)

@@ -80,7 +80,7 @@ class GoCo:
         text = f.read()#FIXME Deal with reading very large files
         return text
     
-    def generate_jshop_code(self,input_file=None,operators_file=None):
+    def generate_jshop_code(self,input_file=None,operators_file=None,problem_file=None):
         """ Generates the JSHOP source code for a GoCo domain"""
         domain_name = "goco"
         domain_operators = ""
@@ -98,6 +98,9 @@ class GoCo:
         if(operators_file is not None):
             domain_operators = self.read_text_file(operators_file)
         
+        if(problem_file is not None):
+            problem_text = self.read_text_file(problem_file)
+        
         domain_source = self.read_text_file(self.domain_template_file)
         problem_source = self.read_text_file(self.problem_template_file)
         axioms_source = self.read_text_file(self.generic_axioms_file)
@@ -105,8 +108,9 @@ class GoCo:
         
         domain_axioms = self.generate_commitment_rules()+self.generate_goal_rules()
         
-        initial_state = "(state)" # TODO complete this
-        task_network = "(!task a b)" # TODO complete this
+        initial_state,task_network = self.parse_problem(problem_text)
+        #initial_state = "(state)" # TODO complete this
+        #task_network = "(!task a b)" # TODO complete this
         
         
         domain_output = domain_source % (domain_name,axioms_source,domain_axioms,operators_source,domain_operators)
@@ -146,6 +150,19 @@ class GoCo:
         for g in goalTuples:
             goal = Goal(g)
             self.goals[goal.gid] = goal
+    
+    def parse_problem(self,text):
+        init_text = "" 
+        for p in re.findall(":init\s((\(.*\)\s?)*)", text):
+            init_text+=p[0]
+        print init_text
+        
+        task_text = "" 
+        for p in re.findall(":task\s((\(!?.*\)\s?)*)", text):
+            task_text+=p[0]
+        print task_text
+        
+        return (init_text,task_text)
     
     def generate_commitment_rules(self):
         """ Generate the logical rules for the commitments"""
@@ -215,6 +232,8 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-p", "--operators", dest="operators", action="store", type="string",
                       help="read domain specific operators from FILE", metavar="FILE")
+    parser.add_option("-b", "--problem", dest="problem", action="store", type="string",
+                      help="read domain specific problem from FILE", metavar="FILE")
     parser.add_option("-d", "--dir-output", dest="output", action="store", type="string",
                       help="write reports to DIR", metavar="DIR")
     parser.add_option("-q", "--quiet",
@@ -245,6 +264,6 @@ if __name__ == '__main__':
     #goco.parse_file(args[0])
     #goco.parse_file('healthcare.goco')
     # print goco.generate_commitment_rules()
-    goco.generate_jshop_code(input_file,options.operators)
+    goco.generate_jshop_code(input_file,options.operators,options.problem)
     domain_name = input_file[:input_file.find(".goco")]
     call(['compile.sh', domain_name, 'pb'+domain_name ,'nogui', '1'])
