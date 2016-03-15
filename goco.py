@@ -68,13 +68,6 @@ class GoCo:
         self.commitments = dict()
         self.goals = dict()
     
-    def parse_file(self, filename):
-        f = open(filename,'r')
-        text = f.read() #FIXME Deal with reading very large files
-        # print text
-        self.parse_commitments(text)
-        self.parse_goals(text)
-    
     def read_text_file(self,filename):
         f = open(filename, 'r')
         text = f.read()#FIXME Deal with reading very large files
@@ -129,6 +122,12 @@ class GoCo:
             f.write(problem_output)
             f.close()
         
+    def parse_file(self, filename):
+        f = open(filename,'r')
+        text = f.read() #FIXME Deal with reading very large files
+        # print text
+        self.parse_commitments(text)
+        self.parse_goals(text)
     
     def parse_commitments(self,text):
                 # commTuples = re.findall(r"""
@@ -181,7 +180,8 @@ class GoCo:
         return r
 
 def parse_expresion(expr, root=None):
-    """Parses an expression in the GoCo grammar -- Right now, VERY limited TODO create a decent parser for this"""
+    """Parses an expression in the GoCo grammar -- Right now, VERY limited"""
+    #TODO create a decent parser for this
     if(expr==""): return None
     
     tokens = re.findall("\s*(-?\w+(\([\w+,?]*\))?|(\s*\^))",expr)
