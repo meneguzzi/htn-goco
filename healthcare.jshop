@@ -56,52 +56,52 @@
  	
  	; Domain specific axioms
  	;C12(TUMORBOARD, PATIENT, patRequestsAssessment, TBAgreesPCP _ TBDisagreesPCP)
-(:- (p ?c C12 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and patRequestsAssessment)))
-(:- (q ?c C12 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and TBAgreesPCP _ TBDisagreesPCP)))
+(:- (p ?c C12 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patRequestsAssessment) ) ) )
+(:- (q ?c C12 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (or (TBAgreesPCP) (TBDisagreesPCP) ) ) )
 
 ;C11(TUMORBOARD, PHYSICIAN, phyRequestsAssessment, TBAgreesRad _ TBDisagreesRad)
-(:- (p ?c C11 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and phyRequestsAssessment)))
-(:- (q ?c C11 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and TBAgreesRad _ TBDisagreesRad)))
+(:- (p ?c C11 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (phyRequestsAssessment)) ) )
+(:- (q ?c C11 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (or (TBAgreesRad) (TBDisagreesRad)) ) )
 
 ;C9(HOSPITAL, PHYSICIAN, vio(C5) ^ escalate, create(C5') ^ create(D2'))
-(:- (p ?c C9 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (vio ?C5) escalate)))
-(:- (q ?c C9 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and create C5 create D2)))
+(:- (p ?c C9 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (vio ?C5) (escalate)) ) )
+(:- (q ?c C9 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (create ?C5) (create ?D2)) ) )
 
 ;C8(REGISTRAR, HOSPITAL, patientReportedToRegistrar, addPatientToCancerRegistry)
-(:- (p ?c C8 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and patientReportedToRegistrar)))
-(:- (q ?c C8 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and addPatientToCancerRegistry)))
+(:- (p ?c C8 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientReportedToRegistrar)) ) )
+(:- (q ?c C8 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (addPatientToCancerRegistry)) ) )
 
 ;C1(PHYSICIAN, PATIENT, diagnosisRequested ^ -vio(C2) ^ -vio(C3), diagnosisProvided)
-(:- (p ?c C1 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and diagnosisRequested (not (vio ?C2)) (not (vio ?C3)))))
-(:- (q ?c C1 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and diagnosisProvided)))
+(:- (p ?c C1 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (diagnosisRequested ?a ?d) (not (vio ?C2)) (not (vio ?C3))) ) )
+(:- (q ?c C1 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (diagnosisProvided ?d ?a)) ) )
 
 ;C10(TUMORBOARD, RADIOLOGIST, radRequestsAssessment, TBAgreesPath _ TBDisagreesPath)
-(:- (p ?c C10 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and radRequestsAssessment)))
-(:- (q ?c C10 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and TBAgreesPath _ TBDisagreesPath)))
+(:- (p ?c C10 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (radRequestsAssessment)) ) )
+(:- (q ?c C10 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (or (TBAgreesPath) (TBDisagreesPath)) ))
 
 ;C3(PATIENT, PHYSICIAN, bAppointmentRequested, bAppointmentKept)
-(:- (p ?c C3 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and bAppointmentRequested)))
-(:- (q ?c C3 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and bAppointmentKept)))
+(:- (p ?c C3 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (bAppointmentRequested ?d ?pathologist)) ) )
+(:- (q ?c C3 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (bAppointmentKept ?d ?pathologist)) ) )
 
 ;C2(PATIENT, PHYSICIAN, iAppointmentRequested, iAppointmentKept)
-(:- (p ?c C2 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and iAppointmentRequested)))
-(:- (q ?c C2 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and iAppointmentKept)))
+(:- (p ?c C2 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (iAppointmentRequested ?d ?radiologist))))
+(:- (q ?c C2 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (iAppointmentKept ?d ?radiologist))))
 
 ;C5(RADIOLOGIST, PHYSICIAN, imagingRequested ^ iAppointmentKept, imagingResultsReported)
-(:- (p ?c C5 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and imagingRequested iAppointmentKept)))
-(:- (q ?c C5 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and imagingResultsReported)))
+(:- (p ?c C5 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (imagingRequested ?a ?patient) (iAppointmentKept ?patient ?a)) ) )
+(:- (q ?c C5 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (imagingResultsReported ?d ?a ?patient)) ) )
 
 ;C4(RADIOLOGIST, PHYSICIAN, biopsyRequested ^ bAppointmentKept, radPathResultsReported)
-(:- (p ?c C4 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and biopsyRequested bAppointmentKept)))
-(:- (q ?c C4 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and radPathResultsReported)))
+(:- (p ?c C4 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (biopsyRequested ?a ?patient) (bAppointmentKept ?patient ?a)) ) )
+(:- (q ?c C4 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (radPathResultsReported ?d ?a ?patient)) ) )
 
 ;C7(PATHOLOGIST, HOSPITAL, patientHasCancer, patientReportedToRegistrar)
-(:- (p ?c C7 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and patientHasCancer)))
-(:- (q ?c C7 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and patientReportedToRegistrar)))
+(:- (p ?c C7 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientHasCancer)) ))
+(:- (q ?c C7 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientReportedToRegistrar)) ))
 
 ;C6(PATHOLOGIST, RADIOLOGIST, pathologyRequested ^ tissueProvided, pathResultsReported)
-(:- (p ?c C6 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and pathologyRequested tissueProvided)))
-(:- (q ?c C6 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and pathResultsReported)))
+(:- (p ?c C6 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (pathologyRequested) (tissueProvided)) ))
+(:- (q ?c C6 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (pathResultsReported)) ))
 
 
  	
@@ -584,17 +584,25 @@
 	)
  	
  	; Domain dependent operators
- 		(:operator (!requestImaging ?physician ?patient ?radiologist)
+	(:operator (!requestAssessment ?patient ?physician)
+		() ; Pre
+		() ; Del
+		((diagnosisRequested ?patient ?physician)) ; Add
+		1 ; Cost
+	)
+	
+	
+ 	(:operator (!requestImaging ?physician ?patient ?radiologist)
 		(and (physician ?physician) (patient ?patient) (radiologist ?radiologist)) ;Pre
 		() ;Del
-		((appointment ?patient ?radiologist)) ;Add
+		((iAppointmentRequested ?patient ?radiologist) (imagingRequested ?physician ?patient)) ;Add
 		1	; Cost
 	)
 	
 	(:operator (!requestBiopsy ?physician ?patient ?pathologist)
 		(and (physician ?physician) (patient ?patient) (pathologist ?pathologist)) ;Pre
 		() ;Del
-		((appointment ?patient ?pathologist)) ;Add
+		((bAppointmentRequested ?patient ?pathologist) (biopsyRequested ?physician ?patient)) ;Add
 		1	; Cost
 	)
 
@@ -603,15 +611,15 @@
 
 	(:operator (!performImaging ?radiologist ?patient ?physician)
 		(and (patient ?patient) (radiologist ?radiologist) (physician ?physician)) ; Pre
-		((appointment ?patient ?radiologist)) ; Del
-		((imagingScan ?patient ?physician)) ; Add
+		((iAppointmentRequested ?patient ?radiologist)) ; Del
+		((imagingScan ?patient ?physician) (iAppointmentKept ?patient ?radiologist)) ; Add
 		1 ; Cost
 	)
 
 	(:operator (!performBiopsy ?pathologist ?patient ?physician)
 		(and (patient ?patient) (pathologist ?pathologist) (physician ?physician)) ; Pre
-		((appointment ?patient ?pathologist)) ; Del
-		((biopsyReport ?patient ?physician)) ; Add
+		((bAppointmentRequested ?patient ?pathologist)) ; Del
+		((biopsyReport ?patient ?physician) (bAppointmentKept ?patient ?pathologist)) ; Add
 		1 ; Cost
 	)
 
@@ -622,30 +630,42 @@
 	(:operator (!requestPathologyReport ?physician ?pathologist ?patient)
 		(and (physician ?physician) (pathologist ?pathologist) (patient ?patient) (biopsyReport ?patient ?physician)) ; Pre
 		() ; Del
-		((pathologyReport ?patient ?pathologist)) ; Add
+		((pathologyReportRequested ?physician ?pathologist ?patient)) ; Add
 		1 ; Cost
 	)
 	
 	(:operator (!requestRadiologyReport ?physician ?radiologist ?patient)
 		(and (physician ?physician) (radiologist ?radiologist) (patient ?patient) (imagingScan ?patient ?physician)) ; Pre
 		() ; Del
-		((radiologyReport ?patient ?radiologist)) ; Add
+		((radiologyReportRequested ?physician ?radiologist ?patient)) ; Add 
 		1 ; Cost
 	)
+
+  (:operator (!sendPathologyReport ?radiologist ?physician ?patient)
+    (and (physician ?physician) (radiologist ?radiologist) (patient ?patient) (biopsyReport ?patient ?physician))
+    () ;Del
+    ( (radPathResultsReported ?radiologist ?physician ?patient) ) ;Add
+  )
+
+  (:operator (!sendRadiologyReport ?radiologist ?physician ?patient)
+    (and (physician ?physician) (radiologist ?radiologist) (patient ?patient) (imagingScan ?patient ?physician) (biopsyReport ?patient ?physician))
+    () ;Del
+    ( (imagingResultsReported ?radiologist ?physician ?patient) ) ;Add
+  )
 	
 	(:operator (!sendIntegratedReport ?radiologist ?pathologist ?patient ?physician)
 		(and (pathologyReport ?patient ?pathologist) (radiologyReport ?patient ?radiologist)
 			(radiologist ?radiologist) (physician ?physician)
 			(patient ?patient) (pathologist ?pathologist)) ; Pre
 		((pathologyReport ?patient ?pathologist) (radiologyReport ?patient ?radiologist)) ; Del
-		((integratedReport ?patient ?physician)) ; Add
+		((integratedReport ?patient ?physician) (diagnosisProvided ?physician ?patient)) ; Add
 		1 ; Cost
 	)
 
 	(:operator (!generateTreatmentPlan ?physician ?patient)
 		(and (patient ?patient) (physician ?physician) (imagingScan ?patient ?physician) (integratedReport ?patient ?physician)) ; Pre
 		() ; Del
-		((treatmentPlan ?patient)) ; Add
+		((treatmentPlan ?physician ?patient)) ; Add
 		1 ; Cost
 	)
 	
