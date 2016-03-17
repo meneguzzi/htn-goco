@@ -610,16 +610,17 @@
 	;; PT: performImaging and sendImagingResults can be combined. 
 
 	(:operator (!performImaging ?radiologist ?patient ?physician)
-		(and (patient ?patient) (radiologist ?radiologist) (physician ?physician)) ; Pre
-		((iAppointmentRequested ?patient ?radiologist)) ; Del
+		(and (patient ?patient) (radiologist ?radiologist) (physician ?physician) (iAppointmentRequested ?patient ?radiologist)) ; Pre
+		( (iAppointmentRequested ?patient ?radiologist) ) ; Del
 		((imagingScan ?patient ?physician) (iAppointmentKept ?patient ?radiologist)) ; Add
 		1 ; Cost
 	)
 
+  ;; Change this to have the radiologist doing the biopsy
 	(:operator (!performBiopsy ?pathologist ?patient ?physician)
 		(and (patient ?patient) (pathologist ?pathologist) (physician ?physician)) ; Pre
 		((bAppointmentRequested ?patient ?pathologist)) ; Del
-		((biopsyReport ?patient ?physician) (bAppointmentKept ?patient ?pathologist)) ; Add
+		((biopsyReport ?patient ?physician) (bAppointmentKept ?patient ?pathologist) (tissueProvided ?patient) ) ; Add
 		1 ; Cost
 	)
 
@@ -628,7 +629,7 @@
 	;; (B) requestRadiologyReport operator; pathologist requests a radiologist for radiology report
 		
 	(:operator (!requestPathologyReport ?physician ?pathologist ?patient)
-		(and (physician ?physician) (pathologist ?pathologist) (patient ?patient) (biopsyReport ?patient ?physician)) ; Pre
+		(and (physician ?physician) (pathologist ?pathologist) (patient ?patient) (biopsyReport ?patient ?physician) ) ; Pre
 		() ; Del
 		((pathologyReportRequested ?physician ?pathologist ?patient)) ; Add
 		1 ; Cost
