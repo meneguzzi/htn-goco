@@ -101,9 +101,9 @@ class GoCo:
         
         domain_axioms = self.generate_commitment_rules()+self.generate_goal_rules()
         
-        initial_state,task_network = self.parse_problem(problem_text)
-        #initial_state = "(state)" # TODO complete this
-        #task_network = "(!task a b)" # TODO complete this
+        initial_state,task_network = self.parse_problem(problem_source)
+        # initial_state = "(state)" # TODO complete this
+        # task_network = "(!task a b)" # TODO complete this
         
         
         domain_output = domain_source % (domain_name,axioms_source,domain_axioms,operators_source,domain_operators)

@@ -600,9 +600,9 @@
 	)
 	
 	(:operator (!requestBiopsy ?physician ?patient ?pathologist)
-		(and (physician ?physician) (patient ?patient) (pathologist ?pathologist)) ;Pre
+		(and (physician ?physician) (patient ?patient) (radiologist ?radiologist)) ;Pre
 		() ;Del
-		((bAppointmentRequested ?patient ?pathologist) (biopsyRequested ?physician ?patient)) ;Add
+		((bAppointmentRequested ?patient ?radiologist) (biopsyRequested ?physician ?patient)) ;Add
 		1	; Cost
 	)
 
@@ -617,10 +617,10 @@
 	)
 
   ;; Change this to have the radiologist doing the biopsy
-	(:operator (!performBiopsy ?pathologist ?patient ?physician)
-		(and (patient ?patient) (pathologist ?pathologist) (physician ?physician)) ; Pre
-		((bAppointmentRequested ?patient ?pathologist)) ; Del
-		((biopsyReport ?patient ?physician) (bAppointmentKept ?patient ?pathologist) (tissueProvided ?patient) ) ; Add
+	(:operator (!performBiopsy ?radiologist ?patient ?physician)
+		(and (patient ?patient) (radiologist ?radiologist) (physician ?physician)) ; Pre
+		((bAppointmentRequested ?patient ?radiologist)) ; Del
+		((biopsyReport ?patient ?physician) (bAppointmentKept ?patient ?radiologist) (tissueProvided ?patient) ) ; Add
 		1 ; Cost
 	)
 
@@ -631,34 +631,39 @@
 	(:operator (!requestPathologyReport ?physician ?pathologist ?patient)
 		(and (physician ?physician) (pathologist ?pathologist) (patient ?patient) (biopsyReport ?patient ?physician) ) ; Pre
 		() ; Del
-		((pathologyReportRequested ?physician ?pathologist ?patient)) ; Add
+		((pathologyRequested ?physician ?pathologist ?patient)) ; Add
 		1 ; Cost
 	)
 	
 	(:operator (!requestRadiologyReport ?physician ?radiologist ?patient)
 		(and (physician ?physician) (radiologist ?radiologist) (patient ?patient) (imagingScan ?patient ?physician)) ; Pre
 		() ; Del
-		((radiologyReportRequested ?physician ?radiologist ?patient)) ; Add 
+		((radiologyRequested ?physician ?radiologist ?patient)) ; Add 
 		1 ; Cost
 	)
 
   (:operator (!sendPathologyReport ?radiologist ?physician ?patient)
-    (and (physician ?physician) (radiologist ?radiologist) (patient ?patient) (biopsyReport ?patient ?physician))
+    (and (physician ?physician) (radiologist ?radiologist) (patient ?patient) (biopsyReport ?patient ?physician)
+	     (pathologyRequested ?physician ?pathologist ?patient))
     () ;Del
     ( (radPathResultsReported ?radiologist ?physician ?patient) ) ;Add
   )
 
   (:operator (!sendRadiologyReport ?radiologist ?physician ?patient)
-    (and (physician ?physician) (radiologist ?radiologist) (patient ?patient) (imagingScan ?patient ?physician) (biopsyReport ?patient ?physician))
+    (and (physician ?physician) (radiologist ?radiologist) (patient ?patient) 
+		 (imagingScan ?patient ?physician) (biopsyReport ?patient ?physician)
+		 (radiologyRequested ?physician ?radiologist ?patient)
+	)
     () ;Del
     ( (imagingResultsReported ?radiologist ?physician ?patient) ) ;Add
   )
 	
 	(:operator (!sendIntegratedReport ?radiologist ?pathologist ?patient ?physician)
-		(and (pathologyReport ?patient ?pathologist) (radiologyReport ?patient ?radiologist)
+		(and (radPathResultsReported ?radiologist ?physician ?patient) 
+			(imagingResultsReported ?radiologist ?physician ?patient)
 			(radiologist ?radiologist) (physician ?physician)
 			(patient ?patient) (pathologist ?pathologist)) ; Pre
-		((pathologyReport ?patient ?pathologist) (radiologyReport ?patient ?radiologist)) ; Del
+		((radPathResultsReported ?radiologist ?physician ?patient) (imagingResultsReported ?radiologist ?physician ?patient)) ; Del
 		((integratedReport ?patient ?physician) (diagnosisProvided ?physician ?patient)) ; Add
 		1 ; Cost
 	)
@@ -666,19 +671,19 @@
 	(:operator (!generateTreatmentPlan ?physician ?patient)
 		(and (patient ?patient) (physician ?physician) (imagingScan ?patient ?physician) (integratedReport ?patient ?physician)) ; Pre
 		() ; Del
-		((treatmentPlan ?physician ?patient)) ; Add
+		((treatmentPlan ?physician ?patient) (diagnosisProvided ?physician ?patient)) ; Add
 		1 ; Cost
 	)
 	
 	(:operator (!reportPatient ?patient ?pathologist ?registrar)
-		(and (patient ?patient) (pathologist ?pathologist) (registrar ?registrar) (hasCancer ?patient)) ; Pre
+		(and (patient ?patient) (pathologist ?pathologist) (registrar ?registrar) (patientHasCancer ?patient)) ; Pre
 		() ; Del
-		( (reported ?patient ?registrar) ) ; Add
+		( (patientReportedToRegistrar ?patient ?registrar) ) ; Add
 		1 ; Cost
 	)
 	
 	(:operator (!addPatientToRegistry ?patient ?registrar)
-		(and (patient ?patient) (registrar ?registrar) (reported ?patient ?registrar)) ; Pre
+		(and (patient ?patient) (registrar ?registrar) (patientReportedToRegistrar ?patient ?registrar)) ; Pre
 		() ; Del
 		( (inRegistry ?patient) ) ; Add
 		1 ; Cost

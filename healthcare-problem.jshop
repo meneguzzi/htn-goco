@@ -6,6 +6,7 @@
 (pathologist doug)
 (registrar evelyn)
 (hospital simhospital)
+(patientHasCancer alice)
 
 :task
 (!requestImaging bob alice clyde)
@@ -14,6 +15,10 @@
 (!performBiopsy doug alice bob)
 (!requestRadiologyReport bob clyde alice)
 (!requestPathologyReport bob doug alice)
+
+(!sendRadiologyReport clyde bob alice)
+(!sendPathologyReport clyde bob alice)
+
 (!sendIntegratedReport clyde doug alice bob)
 (!generateTreatmentPlan bob alice)
 (!reportPatient alice doug evelyn)
