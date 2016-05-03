@@ -20,6 +20,7 @@ class Commitment:
         self.creditor = creditor
         self.antecedent = antecedent
         self.consequent = consequent
+        self.variables = get_variables(antecedent)+get_variables(consequent)
         
     def __str__(self):
         return str(self.cid)+"("+str(self.debtor)+", "+str(self.creditor)+", "+str(self.antecedent)+", "+str(self.consequent)+")"
@@ -29,8 +30,8 @@ class Commitment:
     
     def gen_lisp(self):
         comment = ";"+str(self)
-        antecedent = "(:- (p ?c %s (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) %s))" % (self.cid, lispify(self.antecedent))
-        consequent = "(:- (q ?c %s (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) %s))" % (self.cid, lispify(self.consequent))
+        antecedent = "(:- (p ?c %s (?t)) (and (commitment ?c ?%s ?%s ?%s) (var ?c ?ci (?t)) %s))" % (self.cid, self.cid, self.debtor, self.creditor, lispify(self.antecedent))
+        consequent = "(:- (q ?c %s (?t)) (and (commitment ?c ?%s ?%s ?%s) (var ?c ?ci (?t)) %s))" % (self.cid, self.cid, self.debtor, self.creditor, lispify(self.consequent))
         
         return comment+"\n"+antecedent+"\n"+consequent+"\n"
 
@@ -50,9 +51,9 @@ class Goal:
     
     def gen_lisp(self):
         comment = ";"+str(self)
-        precond = "(:- (pg ?g %s (?t)) (and (goal ?g ?gi ?a) (var ?g ?gi (?t)) %s)" % (self.gid, lispify(self.precond))
-        success = "(:- (s ?g %s (?t)) (and (goal ?g ?gi ?a) (var ?g ?gi (?t)) %s)" % (self.gid, lispify(self.success))
-        failure = "(:- (f ?g %s (?t)) (and (goal ?g ?gi ?a) (var ?g ?gi (?t)) %s)" % (self.gid, lispify(self.failure))
+        precond = "(:- (pg ?g %s (?t)) (and (goal ?g ?%s ?%s) (var ?g ?gi (?t)) %s)" % (self.gid, self.gid, self.agent, lispify(self.precond))
+        success = "(:- (s ?g %s (?t)) (and (goal ?g ?%s ?%s) (var ?g ?gi (?t)) %s)" % (self.gid, self.gid, self.agent, lispify(self.success))
+        failure = "(:- (f ?g %s (?t)) (and (goal ?g ?%s ?%s) (var ?g ?gi (?t)) %s)" % (self.gid, self.gid, self.agent, lispify(self.failure))
         
         return comment+"\n"+precond+"\n"+success+"\n"+failure+"\n"
 
@@ -188,6 +189,10 @@ def parse_expresion(expr, root=None):
     #print "Tokens: ",tokens
     
     return tokens
+
+def get_variables(expr):
+    """TODO Returns a list with the variables in an expression"""
+    pass
 
 def lispify(expr):
     """ Transforms an expression into a LISP-like expression"""

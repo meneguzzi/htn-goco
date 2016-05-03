@@ -1,107 +1,119 @@
 (defdomain healthcare 
  (
- 	; Generic Axioms
- 	;=============================================
+; Generic Axioms
+;=============================================
 ; Axioms for goals
-; predicates on goals - null(c) suspendedG(c) aborted(c) dropped(c) satisfiedG(c)
+; predicates on goals - null(g,gi,gv) suspendedG(g,gi,gv) aborted(g,gi,gv) dropped(g,gi,gv) satisfiedG(g,gi,gv)
 ;=============================================
 
-  (:- (inactiveG ?g) 
-    	        (and (not (null ?g)) (not (pg ?g)) (not (f ?g)) (not (s ?g)) (not (lockedG ?g)) (not (suspendedG ?g))) )
-      (:- (activeG ?g) 
-    	        (and (not (null ?g)) (pg ?g) (not (f ?g)) (not (s ?g)) (not (lockedG ?g)) (not (suspendedG ?g))) )
-    
-      (:- (satisfiedG ?g) (and (not (null ?g)) (not (lockedG ?g)) (pg ?g) (s ?g) (not (f ?g))) )
-    
-    ;  (:- (suspended ?g) (and (not (null ?g)) (not (locked ?g)) (suspended ?g) ) )
-    
-      (:- (failedG ?g) (and (not (null ?g)) (f ?g) ) )
-    
-      (:- (terminatedG ?g) (and (not (null ?g)) (or (dropped ?g) (aborted ?g)) ) )
-    
-      ; A rule to ensure that 
-      (:- (lockedG ?g) (and (goal ?g ?a) (or (dropped ?g) (aborted ?g) )) )
+(:- (null ?g ?gi ?gv) (not (var ?g ?gi ?gv) ) )
+
+(:- (inactiveG ?g ?gi ?gv) 
+	        (and (not (null ?g ?gi ?gv)) (not (f ?g ?gi ?gv)) 
+				 (not (s ?g ?gi ?gv)) (not (terminalG ?g ?gi ?gv)) 
+			     (not (suspendedG ?g ?gi ?gv)) (not (activeG ?g ?gi ?gv))) )
+; Fix this
+(:- (activeG ?g ?gi ?gv) 
+ 	        (and (activatedG ?g ?gi ?gv) (not (f ?g ?gi ?gv)) (not (satisfiedG ?g ?gi ?gv)) 
+				 (not (terminalG ?g ?gi ?gv)) (not (suspendedG ?g ?gi ?gv))) )
+
+(:- (satisfiedG ?g ?gi ?gv) (and (not (null ?g ?gi ?gv)) (not (terminalG ?g ?gi ?gv)) 
+                               (pg ?g ?gi ?gv) (s ?g ?gi ?gv) (not (f ?g ?gi ?gv))) )
+
+;  (:- (suspended ?g ?gi ?gv) (and (not (null ?g ?gi ?gv)) (not (terminal ?g ?gi ?gv)) (suspended ?g ?gi ?gv) ) )
+
+(:- (failedG ?g ?gi ?gv) (and (not (null ?g ?gi ?gv)) (f ?g ?gi ?gv) ) )
+
+(:- (terminatedG ?g ?gi ?gv) (and (not (null ?g ?gi ?gv)) (or (dropped ?g ?gi ?gv) (aborted ?g ?gi ?gv)) ) )
+
+; A rule to ensure that once a goal enters a terminal state (e.g. dropped or aborted), it cannot return
+(:- (terminalG ?g ?gi ?gv) (and (goal ?g ?gi ?a) (or (dropped ?g ?gi ?gv) (aborted ?g ?gi ?gv) )) )
 
 
 ;=============================================
 ; Axioms for commitments
-; predicates on commitments - null(c) cancelled(c) released(c) pending(c) satisfied(c)
+; predicates on commitments 
+; null(c,ci,cv) cancelled(c,ci,cv) released(c,ci,cv) 
+; pending(c,ci,cv) satisfied(c,ci,cv)
 ;=============================================
 
- (:- (conditional ?c) 
-        (and (active ?c) (not (p ?c)) ) )
- (:- (detached ?c) 
-        (and (active ?c) (p ?c) ) )
- ; A conditional commitment is active
- (:- (active ?c) (and (not (null ?c)) 
-                   ;(not (cancelled ?c)) 
-	               ;(not (released ?c)) 
-		           (not (locked ?c))
-	               (not (pending ?c)) 
-		           (not (satisfied ?c)) 
-			  ) )
+(:- (null ?c ?ci ?cv) (not (var ?c ?ci ?cv)) )
 
- (:- (terminated ?c)  (or (and (not (p ?c)) (cancelled ?c)) (released ?c)) )
+(:- (conditional ?c ?ci ?cv) 
+      (and (active ?c ?ci ?cv) (not (p ?c ?ci ?cv)) ) )
+(:- (detached ?c ?ci ?cv) 
+      (and (active ?c ?ci ?cv) (p ?c ?ci ?cv) ) )
+; A conditional commitment is active
+(:- (active ?c ?ci ?cv) (and (var ?c ?ci ?cv);(not (null ?c ?ci ?cv)) 
+	           (not (terminal ?c ?ci ?cv))
+               (not (pending ?c ?ci ?cv)) 
+	           (not (satisfied ?c ?ci ?cv)) 
+		  ) )
 
- (:- (violated ?c) (or (and (p ?c) (cancelled ?c)) (and (not (p ?c)) ) ) )
+(:- (terminated ?c ?ci ?cv)  (or (and (not (p ?c ?ci ?cv)) (cancelled ?c ?ci ?cv)) (released ?c ?ci ?cv)) )
 
- (:- (satisfied ?c) (and (not (null ?c)) (not (locked ?c)) (p ?c) (q ?c)) )
+; (:- (violated ?c ?ci ?cv) (or (and (p ?c ?ci ?cv) (cancelled ?c ?ci ?cv)) (and (not (p ?c ?ci ?cv)) ) ) ) ; Previous formalization with a mistaken disjunction, detected by Pankaj
+(:- (violated ?c ?ci ?cv) (and (p ?c ?ci ?cv) (cancelled ?c ?ci ?cv)) ) 
 
- ; (:- (expired ?c) (and (not (null ?c)) (not (p ?c)) ) )
+(:- (satisfied ?c ?ci ?cv) (and (not (null ?c ?ci ?cv)) (not (terminal ?c ?ci ?cv)) (q ?c ?ci ?cv)) )
 
- ; A rule to enumerate that certain states are terimnal
- (:- (locked ?c) (and (commitment ?c ?d ?a) (or (cancelled ?c) (released ?c) (expired ?c))) )
+;(:- (expired ?c ?ci ?cv) (and (not (null ?c ?ci ?cv)) (not (p ?c ?ci ?cv)) ) )
+
+; A rule to enumerate that certain states are terimnal
+(:- (terminal ?c ?ci ?cv) (and (commitment ?c ?ci ?de ?cr) (or (cancelled ?c ?ci ?cv) (released ?c ?ci ?cv) (expired ?c ?ci ?cv))) )
 
 
  	
- 	; Domain specific axioms
- 	;C12(TUMORBOARD, PATIENT, patRequestsAssessment, TBAgreesPCP _ TBDisagreesPCP)
-(:- (p ?c C12 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patRequestsAssessment) ) ) )
-(:- (q ?c C12 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (or (TBAgreesPCP) (TBDisagreesPCP) ) ) )
-
-;C11(TUMORBOARD, PHYSICIAN, phyRequestsAssessment, TBAgreesRad _ TBDisagreesRad)
-(:- (p ?c C11 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (phyRequestsAssessment)) ) )
-(:- (q ?c C11 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (or (TBAgreesRad) (TBDisagreesRad)) ) )
-
-;C9(HOSPITAL, PHYSICIAN, vio(C5) ^ escalate, create(C5') ^ create(D2'))
-(:- (p ?c C9 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (vio ?C5) (escalate)) ) )
-(:- (q ?c C9 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (create ?C5) (create ?D2)) ) )
-
-;C8(REGISTRAR, HOSPITAL, patientReportedToRegistrar, addPatientToCancerRegistry)
-(:- (p ?c C8 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientReportedToRegistrar)) ) )
-(:- (q ?c C8 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (addPatientToCancerRegistry)) ) )
-
+; Domain specific axioms
 ;C1(PHYSICIAN, PATIENT, diagnosisRequested ^ -vio(C2) ^ -vio(C3), diagnosisProvided)
-(:- (p ?c C1 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (diagnosisRequested ?a ?d) (not (vio ?C2)) (not (vio ?C3))) ) )
+(:- (p ?c C1 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (diagnosisRequested ?a ?d) (not (violated ?c C2 ?cv)) (not (violated ?c C3 ?cv))) ) )
 (:- (q ?c C1 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (diagnosisProvided ?d ?a)) ) )
-
-;C10(TUMORBOARD, RADIOLOGIST, radRequestsAssessment, TBAgreesPath _ TBDisagreesPath)
-(:- (p ?c C10 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (radRequestsAssessment)) ) )
-(:- (q ?c C10 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (or (TBAgreesPath) (TBDisagreesPath)) ))
-
-;C3(PATIENT, PHYSICIAN, bAppointmentRequested, bAppointmentKept)
-(:- (p ?c C3 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (bAppointmentRequested ?d ?pathologist)) ) )
-(:- (q ?c C3 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (bAppointmentKept ?d ?pathologist)) ) )
 
 ;C2(PATIENT, PHYSICIAN, iAppointmentRequested, iAppointmentKept)
 (:- (p ?c C2 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (iAppointmentRequested ?d ?radiologist))))
 (:- (q ?c C2 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (iAppointmentKept ?d ?radiologist))))
 
-;C5(RADIOLOGIST, PHYSICIAN, imagingRequested ^ iAppointmentKept, imagingResultsReported)
-(:- (p ?c C5 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (imagingRequested ?a ?patient) (iAppointmentKept ?patient ?a)) ) )
-(:- (q ?c C5 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (imagingResultsReported ?d ?a ?patient)) ) )
+;C3(PATIENT, PHYSICIAN, bAppointmentRequested, bAppointmentKept)
+(:- (p ?c C3 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (bAppointmentRequested ?d ?pathologist)) ) )
+(:- (q ?c C3 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (bAppointmentKept ?d ?pathologist)) ) )
 
 ;C4(RADIOLOGIST, PHYSICIAN, biopsyRequested ^ bAppointmentKept, radPathResultsReported)
 (:- (p ?c C4 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (biopsyRequested ?a ?patient) (bAppointmentKept ?patient ?a)) ) )
 (:- (q ?c C4 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (radPathResultsReported ?d ?a ?patient)) ) )
 
-;C7(PATHOLOGIST, HOSPITAL, patientHasCancer, patientReportedToRegistrar)
-(:- (p ?c C7 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientHasCancer)) ))
-(:- (q ?c C7 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientReportedToRegistrar)) ))
+;C5(RADIOLOGIST, PHYSICIAN, imagingRequested ^ iAppointmentKept, imagingResultsReported)
+(:- (p ?c C5 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (imagingRequested ?a ?patient) (iAppointmentKept ?patient ?a)) ) )
+(:- (q ?c C5 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (imagingResultsReported ?d ?a ?patient)) ) )
 
 ;C6(PATHOLOGIST, RADIOLOGIST, pathologyRequested ^ tissueProvided, pathResultsReported)
 (:- (p ?c C6 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (pathologyRequested) (tissueProvided)) ))
 (:- (q ?c C6 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (pathResultsReported)) ))
+
+;C7(PATHOLOGIST, HOSPITAL, patientHasCancer, patientReportedToRegistrar)
+(:- (p ?c C7 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientHasCancer)) ))
+(:- (q ?c C7 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientReportedToRegistrar)) ))
+
+;C8(REGISTRAR, HOSPITAL, patientReportedToRegistrar, addPatientToCancerRegistry)
+(:- (p ?c C8 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientReportedToRegistrar)) ) )
+(:- (q ?c C8 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (addPatientToCancerRegistry)) ) )
+
+;C9(HOSPITAL, PHYSICIAN, vio(C5) ^ escalate, create(C5') ^ create(D2')) - Does not work because it depends D5
+(:- (p ?c C9 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (violated ?c C5 ?cv) (escalate)) ) )
+; (:- (q ?c C9 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (create ?C5) (create ?D2)) ) )
+(:- (q ?c C9 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (not (null ?c C5 ?ci)) (not (null ?c D5 ?ci))) ) )
+
+;C10(TUMORBOARD, RADIOLOGIST, radRequestsAssessment, TBAgreesPath _ TBDisagreesPath)
+(:- (p ?c C10 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (radRequestsAssessment)) ) )
+(:- (q ?c C10 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (or (TBAgreesPath) (TBDisagreesPath)) ))
+
+;C11(TUMORBOARD, PHYSICIAN, phyRequestsAssessment, TBAgreesRad _ TBDisagreesRad)
+(:- (p ?c C11 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (phyRequestsAssessment)) ) )
+(:- (q ?c C11 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (or (TBAgreesRad) (TBDisagreesRad)) ) )
+
+;C12(TUMORBOARD, PATIENT, patRequestsAssessment, TBAgreesPCP _ TBDisagreesPCP)
+(:- (p ?c C12 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patRequestsAssessment) ) ) )
+(:- (q ?c C12 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (or (TBAgreesPCP) (TBDisagreesPCP) ) ) )
+
 
 
  	

@@ -377,7 +377,7 @@
   )
 
 
- ;=============================================
+;=============================================
 ; Axioms for goals
 ; predicates on goals - null(g,gi,gv) suspendedG(g,gi,gv) aborted(g,gi,gv) dropped(g,gi,gv) satisfiedG(g,gi,gv)
 ;=============================================
