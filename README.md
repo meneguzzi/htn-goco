@@ -26,3 +26,7 @@ For example, to compile and run a domain stored in cg.jshop with a problem store
 	- [x] Formalise operators from the healthcare scenario
 	- [x] Formalise commitments from the healthcare scenario
 - [ ] Implement domain generator
+- [ ] Make sure code takes into consideration that lists (in the (?t) part of an action invocation) use double parenthesis e.g.
+   ```LISP
+   (!create C7 C7 doug simhospital ((alice evelyn)) )
+   ```

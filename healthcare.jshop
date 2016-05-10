@@ -86,16 +86,16 @@
 (:- (q ?c C5 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (imagingResultsReported ?d ?a ?patient)) ) )
 
 ;C6(PATHOLOGIST, RADIOLOGIST, pathologyRequested ^ tissueProvided, pathResultsReported)
-(:- (p ?c C6 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (pathologyRequested) (tissueProvided)) ))
-(:- (q ?c C6 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (pathResultsReported)) ))
+(:- (p ?c C6 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (pathologyRequested ?physician ?d ?patient) (tissueProvided ?patient)) ))
+(:- (q ?c C6 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (pathResultsReported ?a ?physician ?patient)) ))
 
 ;C7(PATHOLOGIST, HOSPITAL, patientHasCancer, patientReportedToRegistrar)
-(:- (p ?c C7 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientHasCancer)) ))
-(:- (q ?c C7 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientReportedToRegistrar)) ))
+(:- (p ?c C7 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientHasCancer ?patient)) ))
+(:- (q ?c C7 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientReportedToRegistrar ?patient ?registrar)) ))
 
 ;C8(REGISTRAR, HOSPITAL, patientReportedToRegistrar, addPatientToCancerRegistry)
-(:- (p ?c C8 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientReportedToRegistrar)) ) )
-(:- (q ?c C8 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (addPatientToCancerRegistry)) ) )
+(:- (p ?c C8 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (patientReportedToRegistrar ?patient ?d)) ) )
+(:- (q ?c C8 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (inRegistry ?patient)) ) )
 
 ;C9(HOSPITAL, PHYSICIAN, vio(C5) ^ escalate, create(C5') ^ create(D2')) - Does not work because it depends D5
 (:- (p ?c C9 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (violated ?c C5 ?cv) (escalate)) ) )
@@ -550,6 +550,12 @@
 	
     ((commitment ?c ?ci ?d ?a) (call = ?s terminal) (terminal ?c ?ci ?cv))
     ((!!testSuccess ?c ?ci ?cv ?s))
+	
+    ((commitment ?c ?ci ?d ?a) (call = ?s p) (p ?c ?ci ?cv))
+    ((!!testSuccess ?c ?ci ?cv ?s))
+	
+    ((commitment ?c ?ci ?d ?a) (call = ?s q) (q ?c ?ci (?t)))
+    ((!!testSuccess ?c ?ci ?cv ?s))
   )
 
 	(:method (testGoal ?g ?gi ?gv ?s)
@@ -658,7 +664,7 @@
     (and (physician ?physician) (radiologist ?radiologist) (patient ?patient) (biopsyReport ?patient ?physician)
 	     (pathologyRequested ?physician ?pathologist ?patient))
     () ;Del
-    ( (radPathResultsReported ?radiologist ?physician ?patient) ) ;Add
+    ( (radPathResultsReported ?radiologist ?physician ?patient) (pathResultsReported ?radiologist ?physician ?patient) ) ;Add
   )
 
   (:operator (!sendRadiologyReport ?radiologist ?physician ?patient)
