@@ -335,7 +335,7 @@
      )
 
      ( )
-     ((aborted ?g))
+     ((aborted ?g ?gi ?gv))
      1
   )
 
@@ -601,6 +601,105 @@
 		((!!testRuleSuccess ?rule (?g ?gi ?gv ?c ?ci ?cv) ))
 	)
  	
+	; Domain dependent methods
+	(:method (hospitalScenario)
+		((patient ?patient))
+		((seekHelp ?patient) (processPatient ?patient))
+	)
+	
+	(:method (testCommitments)
+		()
+		()
+	)
+	
+	(:method (seekHelp ?patient)
+		((patient ?patient) (physician ?physician) (radiologist ?radiologist)
+			(commitment C1 ?Ci1 ?physician ?patient)
+			
+		 ) ; Precondition
+		((!create C1 ?Ci1 ?physician ?patient (nil))
+		 (!requestAssessment ?patient ?physician)
+		 ) ; Task Network
+	)
+	
+	(:method (processPatient ?patient)
+		((patient ?patient) (physician ?physician) (commitment C1 ?Ci ?physician ?patient) 
+			(radiologist ?radiologist)
+			;(conditional C1 ?Ci ?Cv)
+		 ) ; Precondition
+		((performImagingTests ?patient) (performPathologyTests ?patient) (deliverDiagnostics ?patient)) ; Task Network
+	)
+	
+	(:method (performImagingTests ?patient)
+		imaging
+		((patient ?patient) (physician ?physician) (commitment C1 ?Ci ?physician ?patient) 
+			(radiologist ?radiologist)
+			;(conditional C1 ?Ci ?Cv)
+			(commitment C2 ?Ci2 ?patient ?physician)
+		 ) ; Precondition
+		((!create C2 ?Ci2 ?patient ?physician (?radiologist)) 
+		 (!requestImaging ?physician ?patient ?radiologist)
+		 (attendTest ?patient)
+		) ; Just request imaging
+	)
+	
+	(:method (performPathologyTests ?patient)
+		imaging-plus-biopsy
+		((patient ?patient) (physician ?physician) 
+			(radiologist ?radiologist)
+			;(conditional C1 ?Ci ?Cv)
+			(commitment C3 ?Ci3 ?patient ?physician)
+		 ) ; Precondition
+		((!create C3 ?Ci3 ?patient ?physician (?radiologist)) 
+ 		 (!requestBiopsy ?physician ?patient ?radiologist)
+		 (attendTest ?patient)
+		) ; Request
+	)
+	
+	(:method (performPathologyTests ?patient)
+		biopsy-unnecessary
+		((patient ?patient) (physician ?physician) (commitment C1 ?Ci ?physician ?patient) 
+			(radiologist ?radiologist))
+		() ; Does nothing
+	)
+	
+	(:method (attendTest ?patient)
+		attend-imaging
+		((patient ?patient) (physician ?physician) (radiologist ?radiologist) (iAppointmentRequested ?patient ?radiologist) (not (iAppointmentKept ?patient ?radiologist)) )
+		((!performImaging ?radiologist ?patient ?physician))
+		
+		attend-biopsy
+		((patient ?patient) (physician ?physician) (radiologist ?radiologist) (bAppointmentRequested ?patient ?radiologist) (not (bAppointmentKept ?patient ?radiologist)))
+		((!performBiopsy ?radiologist ?patient ?physician))
+	)
+	
+	(:method (attendTest ?patient)
+		no-show-imaging
+		((patient ?patient) (physician ?physician) (radiologist ?radiologist) (iAppointmentRequested ?patient ?radiologist) (not (iAppointmentKept ?patient ?radiologist)) )
+		() ; No show
+		
+		no-show-biopsy
+		((patient ?patient) (physician ?physician) (radiologist ?radiologist) (bAppointmentRequested ?patient ?radiologist) (not (bAppointmentKept ?patient ?radiologist)))
+		()
+	)
+	
+	(:method (deliverDiagnostics ?patient)
+		only-imaging
+		((patient ?patient) (physician ?physician) (radiologist ?radiologist) (iAppointmentKept ?patient ?radiologist) (not (bAppointmentRequested ?patient ?radiologist)) )
+		((!requestRadiologyReport ?physician ?radiologist ?patient) 
+		 (!sendRadiologyReport ?radiologist ?physician ?patient) 
+		 (!generateTreatmentPlan ?physician ?patient) )
+		
+		imaging-biopsy-integrated
+		((patient ?patient) (physician ?physician) (radiologist ?radiologist) (pathologist ?pathologist) (iAppointmentKept ?patient ?radiologist) (bAppointmentKept ?patient ?radiologist) )
+		((!requestRadiologyReport ?physician ?radiologist ?patient)
+		 (!requestPathologyReport ?physician ?radiologist ?patient)
+		 (!sendRadiologyReport ?radiologist ?physician ?patient) 
+		 (!sendPathologyReport ?radiologist ?physician ?patient) 
+		 (!sendIntegratedReport ?radiologist ?pathologist ?pathologist ?physician)
+	     (!generateTreatmentPlan ?physician ?patient) )
+	)
+	
  	; Domain dependent operators
 	(:operator (!requestAssessment ?patient ?physician)
 		() ; Pre
@@ -687,7 +786,8 @@
 	)
 
 	(:operator (!generateTreatmentPlan ?physician ?patient)
-		(and (patient ?patient) (physician ?physician) (imagingScan ?patient ?physician) (integratedReport ?patient ?physician)) ; Pre
+		(and (patient ?patient) (physician ?physician) (imagingScan ?patient ?physician) 			;(integratedReport ?patient ?physician) ;<- This should not be a precondition (since only imaging may do)
+		  ) ; Pre
 		() ; Del
 		((treatmentPlan ?physician ?patient) (diagnosisProvided ?physician ?patient)) ; Add
 		1 ; Cost

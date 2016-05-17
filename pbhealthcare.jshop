@@ -62,7 +62,7 @@
 		(!requestAssessment alice bob)
 		
 		(!create C2 C2 alice bob (clyde))
-		(!create C3 C3 alice bob (doug))
+		(!create C3 C3 alice bob (clyde))
 		
 		(!create C4 C4 clyde bob (doug))
 		(!create C5 C5 clyde bob (doug))
@@ -77,7 +77,7 @@
 		(!performBiopsy clyde alice bob)
 		
 		(testCommitment C2 C2 (clyde) satisfied)
-		(testCommitment C3 C3 (doug) satisfied)
+		(testCommitment C3 C3 (clyde) satisfied)
 		
 		(!requestRadiologyReport bob clyde alice)
 		(!requestPathologyReport bob doug alice)
@@ -105,5 +105,29 @@
 
 	) ;tn
 
+	;; Problem 3
+	(
+		(patient alice)
+		(physician bob)
+		(radiologist clyde)
+		(pathologist doug)
+		(registrar evelyn)
+		(hospital simhospital)
+		(patientHasCancer alice)
+
+		(commitment C1 C1 bob alice)
+		(commitment C2 C2 alice bob)
+		(commitment C3 C3 alice bob)
+		(commitment C4 C4 clyde bob)
+		(commitment C5 C5 clyde bob)
+		(commitment C6 C6 doug clyde)
+		(commitment C7 C7 doug simhospital)
+		(commitment C8 C8 evelyn simhospital)
+
+	) ; Initial State
 	
+	(
+		(hospitalScenario)
+		(testCommitments)
+	) ;tn
 )
