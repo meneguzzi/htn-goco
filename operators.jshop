@@ -8,6 +8,13 @@
 	()
 	0
   )
+  
+  (:operator (!!testFailure ?cg ?state)
+	nil
+	nil
+	nil
+	0
+  )
 
   (:operator (!create ?c ?ci ?de ?cr ?cv)
     ((commitment ?c ?ci ?de ?cr) 

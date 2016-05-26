@@ -128,6 +128,13 @@
 	()
 	0
   )
+  
+  (:operator (!!testFailure ?cg ?state)
+	nil
+	nil
+	nil
+	0
+  )
 
   (:operator (!create ?c ?ci ?de ?cr ?cv)
     ((commitment ?c ?ci ?de ?cr) 
@@ -258,6 +265,7 @@
 	()
 	0
   )
+  
 
   ; Regular transitions 
   (:operator (!consider ?g ?gi ?a ?gv)
@@ -556,6 +564,10 @@
 	
     ((commitment ?c ?ci ?d ?a) (call = ?s q) (q ?c ?ci (?t)))
     ((!!testSuccess ?c ?ci ?cv ?s))
+	
+	failed
+	((commitment ?c ?ci ?d ?a) )
+	((!!testFailure ?c ?s))
   )
 
 	(:method (testGoal ?g ?gi ?gv ?s)
@@ -594,6 +606,10 @@
 		
 	   	((goal ?g ?gi ?a) (call = ?s terminal) (terminalG ?g ?gi ?gv))
 	    ((!!testSuccessG ?g ?gi ?gv ?s))
+		
+		failed
+		((goal ?g ?gi ?a))
+		((!!testFailure ?g ?s))
 	)
 	
 	(:method (testGoalCommitmentRule ?rule ?g ?gi ?a ?c ?ci ?de ?cr)
@@ -604,12 +620,31 @@
 	; Domain dependent methods
 	(:method (hospitalScenario)
 		((patient ?patient))
-		((seekHelp ?patient) (processPatient ?patient))
+		((seekHelp ?patient) 
+		 (processPatient ?patient))
 	)
 	
 	(:method (testCommitments)
-		()
-		()
+		(
+		 (commitment C1 ?c1 ?d1 ?a1) 
+		 (commitment C2 ?c2 ?d2 ?a2) 
+	     (commitment C3 ?c3 ?d3 ?a3)
+		 (commitment C4 ?c4 ?d4 ?a4)
+		 (commitment C5 ?c5 ?d5 ?a5)
+		 (commitment C6 ?c6 ?d6 ?a6)
+		 (commitment C7 ?c7 ?d7 ?a7)
+		 (commitment C8 ?c8 ?d8 ?a8)
+		 ) ; Precond
+		(
+		 (testCommitment C1 ?c1 ?cv1 satisfied)
+		 (testCommitment C2 ?c2 ?cv2 satisfied)
+		 (testCommitment C3 ?c3 ?cv3 satisfied)
+		 (testCommitment C4 ?c4 ?cv4 satisfied)
+		 (testCommitment C5 ?c5 ?cv5 satisfied)
+		 (testCommitment C6 ?c6 ?cv6 satisfied)
+		 (testCommitment C7 ?c7 ?cv7 satisfied)
+		 (testCommitment C8 ?c8 ?cv8 satisfied)
+		)
 	)
 	
 	(:method (seekHelp ?patient)
@@ -623,44 +658,53 @@
 	)
 	
 	(:method (processPatient ?patient)
+		process-patient-healthy
 		((patient ?patient) (physician ?physician) (commitment C1 ?Ci ?physician ?patient) 
 			(radiologist ?radiologist)
 			;(conditional C1 ?Ci ?Cv)
 		 ) ; Precondition
-		((performImagingTests ?patient) (performPathologyTests ?patient) (deliverDiagnostics ?patient)) ; Task Network
+		((performImagingTests ?patient)
+		 (performPathologyTests ?patient) 
+		 (deliverDiagnostics ?patient)) ; Task Network
 	)
 	
 	(:method (performImagingTests ?patient)
 		imaging
 		((patient ?patient) (physician ?physician) (commitment C1 ?Ci ?physician ?patient) 
 			(radiologist ?radiologist)
+			(pathologist ?pathologist)
 			;(conditional C1 ?Ci ?Cv)
 			(commitment C2 ?Ci2 ?patient ?physician)
+			(commitment C5 ?Ci5 ?radiologist ?physician)
 		 ) ; Precondition
 		((!create C2 ?Ci2 ?patient ?physician (?radiologist)) 
+		 (!create C5 ?Ci5 ?radiologist ?physician (?pathologist)) 
 		 (!requestImaging ?physician ?patient ?radiologist)
 		 (attendTest ?patient)
 		) ; Just request imaging
 	)
 	
 	(:method (performPathologyTests ?patient)
-		imaging-plus-biopsy
-		((patient ?patient) (physician ?physician) 
-			(radiologist ?radiologist)
-			;(conditional C1 ?Ci ?Cv)
-			(commitment C3 ?Ci3 ?patient ?physician)
-		 ) ; Precondition
-		((!create C3 ?Ci3 ?patient ?physician (?radiologist)) 
- 		 (!requestBiopsy ?physician ?patient ?radiologist)
-		 (attendTest ?patient)
-		) ; Request
+		biopsy-unnecessary
+		((patient ?patient) (physician ?physician) (commitment C1 ?Ci ?physician ?patient)
+			(radiologist ?radiologist))
+		() ; Does nothing
 	)
 	
 	(:method (performPathologyTests ?patient)
-		biopsy-unnecessary
-		((patient ?patient) (physician ?physician) (commitment C1 ?Ci ?physician ?patient) 
-			(radiologist ?radiologist))
-		() ; Does nothing
+		imaging-plus-biopsy
+		((patient ?patient) (physician ?physician) 
+			(radiologist ?radiologist)
+			(pathologist ?pathologist)
+			;(conditional C1 ?Ci ?Cv)
+			(commitment C3 ?Ci3 ?patient ?physician)
+			(commitment C4 ?Ci4 ?radiologist ?physician)
+		 ) ; Precondition
+		((!create C3 ?Ci3 ?patient ?physician (?radiologist))
+		 (!create C4 ?Ci4 ?radiologist ?physician (?pathologist)) 
+ 		 (!requestBiopsy ?physician ?patient ?radiologist)
+		 (attendTest ?patient)
+		) ; Request
 	)
 	
 	(:method (attendTest ?patient)
@@ -685,7 +729,7 @@
 	
 	(:method (deliverDiagnostics ?patient)
 		only-imaging
-		((patient ?patient) (physician ?physician) (radiologist ?radiologist) (iAppointmentKept ?patient ?radiologist) (not (bAppointmentRequested ?patient ?radiologist)) )
+		((patient ?patient) (physician ?physician) (radiologist ?radiologist) (iAppointmentKept ?patient ?radiologist) (not (biopsyRequested ?physician ?patient)) )
 		((!requestRadiologyReport ?physician ?radiologist ?patient) 
 		 (!sendRadiologyReport ?radiologist ?physician ?patient) 
 		 (!generateTreatmentPlan ?physician ?patient) )
@@ -696,7 +740,7 @@
 		 (!requestPathologyReport ?physician ?radiologist ?patient)
 		 (!sendRadiologyReport ?radiologist ?physician ?patient) 
 		 (!sendPathologyReport ?radiologist ?physician ?patient) 
-		 (!sendIntegratedReport ?radiologist ?pathologist ?pathologist ?physician)
+		 (!sendIntegratedReport ?radiologist ?pathologist ?patient ?physician)
 	     (!generateTreatmentPlan ?physician ?patient) )
 	)
 	
@@ -745,8 +789,8 @@
 	;; (A) requestPathologyReport operator; radiologist requests a pathologist for pathology report
 	;; (B) requestRadiologyReport operator; pathologist requests a radiologist for radiology report
 		
-	(:operator (!requestPathologyReport ?physician ?pathologist ?patient)
-		(and (physician ?physician) (pathologist ?pathologist) (patient ?patient) (biopsyReport ?patient ?physician) ) ; Pre
+	(:operator (!requestPathologyReport ?physician ?radiologist ?patient)
+		(and (physician ?physician) (pathologist ?pathologist) (radiologist ?radiologist) (patient ?patient) (biopsyReport ?patient ?physician) ) ; Pre
 		() ; Del
 		((pathologyRequested ?physician ?pathologist ?patient)) ; Add
 		1 ; Cost
@@ -768,7 +812,7 @@
 
   (:operator (!sendRadiologyReport ?radiologist ?physician ?patient)
     (and (physician ?physician) (radiologist ?radiologist) (patient ?patient) 
-		 (imagingScan ?patient ?physician) (biopsyReport ?patient ?physician)
+		 (imagingScan ?patient ?physician) ;(biopsyReport ?patient ?physician)
 		 (radiologyRequested ?physician ?radiologist ?patient)
 	)
     () ;Del
@@ -780,7 +824,8 @@
 			(imagingResultsReported ?radiologist ?physician ?patient)
 			(radiologist ?radiologist) (physician ?physician)
 			(patient ?patient) (pathologist ?pathologist)) ; Pre
-		((radPathResultsReported ?radiologist ?physician ?patient) (imagingResultsReported ?radiologist ?physician ?patient)) ; Del
+		;((radPathResultsReported ?radiologist ?physician ?patient) (imagingResultsReported ?radiologist ?physician ?patient)) ; Del
+    nil
 		((integratedReport ?patient ?physician) (diagnosisProvided ?physician ?patient)) ; Add
 		1 ; Cost
 	)

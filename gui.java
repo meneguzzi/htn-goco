@@ -8,8 +8,17 @@ public class gui{
 		try {
 			Class aClass = classloader.loadClass(args[0]);
 			java.lang.reflect.Method method = aClass.getMethod("getPlans");
-			Object o = method.invoke(null);
-			System.out.println(o);
+			LinkedList<Plan> plans = (LinkedList<Plan>) method.invoke(null);
+			// System.out.println(plans);
+			System.out.println(plans.size()+" plans found!");
+			int planIndex = 1;
+			for(Plan plan:plans) {
+				System.out.println("Plan "+planIndex);
+				System.out.println(plan);
+				planIndex++;
+			}
+			// Object o = method.invoke(null);
+			// System.out.println(o);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
