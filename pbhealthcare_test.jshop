@@ -136,8 +136,8 @@
 		; Goals
 		(goal G1 G1 bob)
 		(goal G2 G2 alice)
-		(goal G3 G3 bob)
-		(goal G4 G4 clyde)
+		(goal G3 G3 clyde)
+		(goal G4 G4 bob)
 		(goal G5 G5 doug)
 
 	) ; Initial State
@@ -156,22 +156,32 @@
 		(detach G2 G2 (alice) C1 C1 (alice) bob alice)
 		
 		(!requestAssessment alice bob)
-		
-		(testGoal G1 G1 (alice) satisfied)
-		
-		(deliver G3 G3 (alice) C1 C1 (alice) bob alice)
-
 		(!create C2 C2 alice bob (clyde))
 		(!create C3 C3 alice bob (clyde))
+		
+		(testGoal G1 G1 (alice) satisfied)
+		(testGoal G2 G2 (alice) satisfied)
+		(testCommitment C1 C1 (alice) detached)
+		
+		(!consider G3 G3 clyde (alice) )
+		(!activate G3 G3 clyde (alice) )
+		
+		(entice G3 G3 (alice) C4 C4 (alice) clyde bob)
+		; This is a vacuous definition of detach
+		; (!consider G4 G4 clyde (alice) )
+		; (!activate G4 G4 clyde (alice) )
+		; Alice detaches
+		(detach G4 G4 (alice) C4 C4 (alice) clyde bob)
 
-		(!create C4 C4 clyde bob (doug))
+		(!requestImaging bob alice clyde)
+
+		; (!create C4 C4 clyde bob (doug))
 		(!create C5 C5 clyde bob (doug))
 		(!create C6 C6 doug clyde ((bob alice)) )
 
 		(!create C7 C7 doug simhospital ((alice evelyn)) )
 		(!create C8 C8 evelyn simhospital (alice))
 		
-		(!requestImaging bob alice clyde)
 		(!requestBiopsy bob alice clyde)
 		(!performImaging clyde alice bob)
 		(!performBiopsy clyde alice bob)

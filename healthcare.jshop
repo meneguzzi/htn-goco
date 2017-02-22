@@ -61,7 +61,7 @@
 (:- (f  ?g G2 (?t)) (and (goal ?g ?gi ?a) (var ?g ?gi (?t)) (dontknow ?patient) ))
 
 (:- (pg ?g G3 (?t)) (and (goal ?g ?gi ?a) ) )
-(:- (s  ?g G3 (?t)) (and (goal ?g ?gi ?a) (var ?g ?gi (?t)) (biopsyRequested ?physician ?patient) ) )
+(:- (s  ?g G3 (?t)) (and (goal ?g ?gi ?a) (var ?g ?gi (?t)) (imagingRequested ?physician ?patient) (iAppointmentRequested ?patient ?radiologist) ) )
 (:- (f  ?g G3 (?t)) (and (goal ?g ?gi ?a) (var ?g ?gi (?t)) (dontknow ?patient) ))
 
 (:- (pg ?g G4 (?t)) (and (goal ?g ?gi ?a) ) )
@@ -109,6 +109,7 @@
 ; Domain specific axioms
 ;C1(PHYSICIAN, PATIENT, diagnosisRequested ^ -vio(C2) ^ -vio(C3), diagnosisProvided)
 (:- (p ?c C1 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (diagnosisRequested ?a ?d) (not (violated ?c C2 ?cv)) (not (violated ?c C3 ?cv))) ) )
+; TODO Correct this, to "include inactive for the two commitments"
 (:- (q ?c C1 (?t)) (and (commitment ?c ?ci ?d ?a) (var ?c ?ci (?t)) (and (diagnosisProvided ?d ?a)) ) )
 
 ;C2(PATIENT, PHYSICIAN, iAppointmentRequested, iAppointmentKept)
