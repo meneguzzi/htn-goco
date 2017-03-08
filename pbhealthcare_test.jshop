@@ -374,54 +374,65 @@
 		; Pathologist employs ENTICE for G12 to create commitment C6
 		(entice G12 G12 (alice) C6 C6 (alice) doug clyde)
 
-
 		;Radiologist employs DETACH for C6 to consider and activate goal G13
+		(detach G13 G13 (clyde) C6 C6 (alice) doug clyde)
 
+		;Radiologist brings about pathologyRequested and tissueProvided
+		(!performBiopsy clyde alice bob)
+		(!requestPathologyReport bob clyde doug alice)
 
+		;The above should satisfy G13 and detach C6
+		(testGoal G13 G13 (clyde) satisfied)
+		(testCommitment C6 C6 (alice) detached)
+		
+		;Pathologist employs DELIVER for C6 to consider and activate goal G15
+		(deliver G15 G15 (doug) C6 C6 (alice) doug clyde)
 
+		;Pathologist brings about pathResultsReported
+		(!sendPathologyReport clyde bob doug alice)
 
-		;;;;;;;;;
-
-
-		; (!create C4 C4 clyde bob (doug))
-		; (!create C5 C5 clyde bob (alice))
-; 		(!create C6 C6 doug clyde (alice) )
-;
-; 		(!create C7 C7 doug simhospital (alice) )
-; 		(!create C8 C8 evelyn simhospital (alice))
-;
-; 		(!requestBiopsy bob alice clyde)
-; 		(!performImaging clyde alice bob)
-; 		(!performBiopsy clyde alice bob)
-;
-; 		(testCommitment C2 C2 (clyde) satisfied)
-; 		(testCommitment C3 C3 (clyde) satisfied)
-;
-; 		(!requestRadiologyReport bob clyde alice)
-; 		(!requestPathologyReport bob clyde doug alice)
-;
-; 		(!sendRadiologyReport clyde bob alice)
-; 		(!sendPathologyReport clyde bob doug alice)
-;
-; 		(testCommitment C4 C4 (doug) satisfied)
-; 		(testCommitment C5 C5 (doug) satisfied)
-; 		(testCommitment C6 C6 ((bob alice)) satisfied)
-;
-; 		(!sendIntegratedReport clyde doug alice bob)
-; 		(!generateTreatmentPlan bob alice)
-; 		(!reportPatient alice doug evelyn)
-;
-; 		(testCommitment C7 C7 ((alice evelyn)) satisfied)
-;
-; 		(!addPatientToRegistry alice evelyn)
-;
-; 		(testCommitment C8 C8 (alice) satisfied)
-;
-; 		(!requestPhysicianReportAssessment alice bob simhospital)
-;
-; 		(testCommitment C1 C1 (alice) satisfied)
-; 		(testGoal G2 G2 (alice) satisfied)
-; 		(testGoal G3 G3 (alice) satisfied)
-
+		;The above should satisfies G15 and C6
+		(testGoal G15 G15 (doug) satisfied)
+		(testcommitment C6 C6 (alice) satisfied)
+		
+		;Radiologist employs DELIVER for C5 to consider and activate goal G16
+		(deliver G16 G16 (clyde) C5 C5  (alice) clyde bob)
+		
+		;Radiologist brings about radPathResultsReported
+		(!sendRadiologyReport clyde bob alice)
+		(!sendIntegratedReport clyde doug alice bob)
+		
+		;The above should satisfies G16 and C5
+		(testGoal G16 G16 (clyde) satisfied)
+		(testcommitment C5 C5 (alice) satisfied)
+		
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		
+		; Registrar considers and activates goal
+		(!consider G17 G17 evelyn (alice) )
+		(!activate G17 G17 evelyn (alice) )
+		
+		; Registrar employs ENTICE for G17 to create commitment C7
+		(entice G17 G17 (alice) C7 C7 (alice) evelyn doug)
+		
+		; Pathologist employs DETACH rule if patient has cancer to consider and activate goal G18
+		(detach G18 G18 (doug) C7 C7 (alice) evelyn doug)
+		
+		; Pathologist brings about reportPatientWithCancer
+		(testGoal G17 G17 (alice) satisfied)
+		(testCommitment C7 C7 (alice) detached)
+		
+		; Registrar employs DELIVER rule for C7 to consider and activate goal G19
+		(deliver G19 G19 (evelyn) C7 C7 (alice) evelyn doug)
+		
+		; Pathologist reports patient to registrar
+		(!reportPatient alice doug evelyn)
+		
+		; Registrar brings about addPatientToRegistry. This:
+		(!addPatientToRegistry alice evelyn)
+		
+		;The above should satisfy G19 and C7
+		(testGoal G19 G19 (evelyn) satisfied)
+		(testCommitment C7 C7 (alice) satisfied)
 	) ;tn
 )
