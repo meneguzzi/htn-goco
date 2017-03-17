@@ -20,7 +20,7 @@
 ; predicates on goals - null(g,gi,gv) suspendedG(g,gi,gv) aborted(g,gi,gv) dropped(g,gi,gv) satisfiedG(g,gi,gv)
 ;=============================================
 
-(:- (null ?g ?gi ?gv) (not (varG ?g ?gi ?gv) ) )
+(:- (null ?g ?gi ?gv) (not (var ?g ?gi ?gv) ) )
 
 (:- (inactiveG ?g ?gi ?gv)
 	        (and (not (null ?g ?gi ?gv)) (not (f ?g ?gi ?gv))
