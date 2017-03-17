@@ -392,7 +392,7 @@
 		;Pathologist brings about pathResultsReported
 		(!sendPathologyReport clyde bob doug alice)
 
-		;The above should satisfies G15 and C6
+		;The above should satisfy G15 and C6
 		(testGoal G15 G15 (doug) satisfied)
 		(testcommitment C6 C6 (alice) satisfied)
 		
