@@ -2,4 +2,4 @@ language: java
 jdk:
   - oraclejdk8
 script:
-  - ./compile.sh healthcare.jshop pbhealthcare_test.jshop nogui
+  - ./compile.sh healthcare pbhealthcare_test nogui
