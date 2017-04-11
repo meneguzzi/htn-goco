@@ -4,6 +4,6 @@ env:
 jdk:
   - oraclejdk8
 before_script:
-  - cd jshop2; make
+  - pushd jshop2; make; popd
 script:
   - ./compile.sh healthcare pbhealthcare_test nogui
