@@ -1,6 +1,6 @@
 language: java
 env:
-  - CLASSPATH=`pwd`/jshop2/antlr.jar:`pwd`/JSHOP2.jar:.
+  - CLASSPATH=`pwd`/jshop2/antlr.jar:`pwd`/jshop2/bin.build/JSHOP2.jar:.
 jdk:
   - oraclejdk8
 before_script:
