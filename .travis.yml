@@ -1,5 +1,9 @@
 language: java
+env:
+  - CLASSPATH=`pwd`/jshop2/antlr.jar:`pwd`/JSHOP2.jar:.
 jdk:
   - oraclejdk8
+before_script:
+  - cd jshop2; make
 script:
   - ./compile.sh healthcare pbhealthcare_test nogui
