@@ -5,6 +5,7 @@ if [ $# -lt 3 ]
 else
 	echo $CLASSPATH
 	export CLASSPATH=./jshop2/antlr.jar:./jshop2/JSHOP2.jar:.
+	ls ./jshop2
 	echo $CLASSPATH
 	java -cp $CLASSPATH JSHOP2.InternalDomain ${1}.jshop
 	java -cp $CLASSPATH JSHOP2.InternalDomain -r${4} ${2}.jshop
