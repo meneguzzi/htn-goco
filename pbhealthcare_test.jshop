@@ -312,14 +312,14 @@
 
 		; Patient brings about iAppointmentKept
 		(attendTest alice)
-		(testCommitment C4 C4 (alice) detached) ; TODO This won't detach C4 because it also requires the imaging appotintment to have been kept (this only happens attendTest below)
+		(testCommitment C4 C4 (alice) detached)
 
 		; The above should satisfy G6 and C2
 		(testGoal G6 G6 (alice) satisfied)
 		(testCommitment C2 C2 (clyde) satisfied)
 
 		; Radiologist employs DELIVER for C4 to consider and activate goal G7
-		(deliver G7 G7 (clyde) C4 C4 (alice) clyde bob)
+		(deliver G7 G7 (alice) C4 C4 (alice) clyde bob)
 
 		; Physician requests radiology report
 		(!requestRadiologyReport bob clyde alice)
@@ -427,7 +427,7 @@
 		(testCommitment C7 C7 (alice) detached)
 		
 		; Registrar employs DELIVER rule for C7 to consider and activate goal G19
-		(deliver G19 G19 (evelyn) C7 C7 (alice) evelyn doug)
+		(deliver G19 G19 (alice) C7 C7 (alice) evelyn doug)
 		
 		; Registrar brings about addPatientToRegistry. This:
 		(!addPatientToRegistry alice evelyn)
