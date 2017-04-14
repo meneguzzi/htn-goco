@@ -1,4 +1,4 @@
-(defproblem pbhealthcare_test_steps healthcare_u
+(defproblem pbhealthcare_test_steps healthcare
 	(
 		(patient alice)
 		(physician bob)
