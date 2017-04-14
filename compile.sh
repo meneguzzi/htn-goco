@@ -26,14 +26,22 @@ else
 # 		PROBLEM=${2}.ujshop
 # 	fi
 	
+	ERROR=0
+	
 	java -cp $CLASSPATH JSHOP2.InternalDomain ${1}.jshop #${DOMAIN}
+	ERROR=${ERROR}||$?
 	java -cp $CLASSPATH JSHOP2.InternalDomain -r${4} ${2}.jshop #${PROBLEM}
+	ERROR=${ERROR}||$?
 	javac *.java
+	ERROR=${ERROR}||$?
 	if [ $3 = "gui" ]; then
 		java ${PARS} gui $2
 	else
 		java ${PARS} run $2
 	fi
+	ERROR=${ERROR}||$?
 	rm *.class
 	rm ${1}.java ${2}.java ${1}.txt
+	
+	exit $ERROR
 fi
