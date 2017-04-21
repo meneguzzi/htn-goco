@@ -5,7 +5,7 @@ if [ $# -lt 3 ]
 else
 	# echo $CLASSPATH
 	export CLASSPATH=./jshop2/antlr.jar:./jshop2/bin.build/JSHOP2.jar:.
-	export PARS="-Xms4g -Xmx8g"
+	export PARS="-Xms4g -Xmx8g -Xss4m"
 	# echo $CLASSPATH
 	# DOMAIN=${1}
 # 	PROBLEM=${2}
