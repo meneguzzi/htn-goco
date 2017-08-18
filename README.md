@@ -1,5 +1,7 @@
 # HTN-GoCo
 
+[![DOI](https://zenodo.org/badge/48817866.svg)](https://zenodo.org/badge/latestdoi/48817866)
+
 Repository for the code used in the goals and commitments planning framework developed by Meneguzzi, Telang and others. 
 The following papers discuss this in more theoretical detail:
 - MENEGUZZI, Felipe; TELANG, Pankaj and SINGH, Munindar P. [A First-Order Formalization of Commitments and Goals](http://www.aaai.org/ocs/index.php/AAAI/AAAI13/paper/view/6371/7241), In Proceedings of the 27th AAAI Conference on Artificial Intelligence (AAAI), Bellevue, WA, USA, 2013. 
