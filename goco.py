@@ -59,21 +59,21 @@ class Goal:
 
 class GoCo:
     
-    #TODO use a settings file to configure this
+    # TODO use a settings file to configure this
     generic_axioms_file = "axioms.jshop"
     generic_operators_file = "operators.jshop"
     domain_template_file = "domain-template.jshop"
     problem_template_file = "problem-template.jshop"
-     
+
     def __init__(self):
         self.commitments = dict()
         self.goals = dict()
-    
-    def read_text_file(self,filename):
+
+    def read_text_file(self, filename):
         f = open(filename, 'r')
-        text = f.read()#FIXME Deal with reading very large files
+        text = f.read()  # FIXME Deal with reading very large files
         return text
-    
+
     def generate_jshop_code(self,input_file=None,operators_file=None,problem_file=None):
         """ Generates the JSHOP source code for a GoCo domain"""
         domain_name = "goco"

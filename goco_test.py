@@ -2,6 +2,7 @@ import unittest
 import goco as gc
 from goco import lispify
 
+
 class GoCoTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
