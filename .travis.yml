@@ -2,7 +2,7 @@ language: java
 env:
   - CLASSPATH=`pwd`/jshop2/antlr.jar:`pwd`/jshop2/bin.build/JSHOP2.jar:.
 jdk:
-  - oraclejdk8
+  - oraclejdk9
 before_script:
   - pushd jshop2; make; popd
 script:
