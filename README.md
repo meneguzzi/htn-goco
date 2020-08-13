@@ -1,5 +1,7 @@
 # HTN-GoCo
 
+[![DOI](https://zenodo.org/badge/48817866.svg)](https://zenodo.org/badge/latestdoi/48817866)
+
 Repository for the code used in the goals and commitments planning framework developed by Meneguzzi, Telang and others. 
 The following papers discuss this in more theoretical detail:
 - MENEGUZZI, Felipe; TELANG, Pankaj and SINGH, Munindar P. [A First-Order Formalization of Commitments and Goals](http://www.aaai.org/ocs/index.php/AAAI/AAAI13/paper/view/6371/7241), In Proceedings of the 27th AAAI Conference on Artificial Intelligence (AAAI), Bellevue, WA, USA, 2013. 
@@ -19,14 +21,3 @@ For example, to compile and run a domain stored in cg.jshop with a problem store
 
 ## Installing JSHOP2
 [JSHOP2](https://sourceforge.net/projects/shop/files/JSHOP2/) lives in Sourceforge, but it seems to have been abandoned. If you really like Github, some people mirrored it at [https://github.com/mas-group/jshop2](https://github.com/mas-group/jshop2)
-
-## Tasks
-- [ ] Write a software to generate the domains automatically from goals and commitments
-- [ ] Implement new domain
-	- [x] Formalise operators from the healthcare scenario
-	- [x] Formalise commitments from the healthcare scenario
-- [ ] Implement domain generator
-- [ ] Make sure code takes into consideration that lists (in the (?t) part of an action invocation) use double parenthesis e.g.
-   ```LISP
-   (!create C7 C7 doug simhospital ((alice evelyn)) )
-   ```
